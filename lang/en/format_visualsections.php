@@ -24,6 +24,7 @@
  */
 
 $string['addsections'] = 'Add visualsections';
+$string['addsubsection'] = 'Add subsection';
 $string['currentsection'] = 'This topic';
 $string['editsection'] = 'Edit topic';
 $string['editsectionname'] = 'Edit topic name';
