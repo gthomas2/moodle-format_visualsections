@@ -26,8 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot. '/course/format/lib.php');
 
-use format_visualsections\lib\local;
-
 /**
  * Main class for the Visual Sections course format
  *
@@ -268,26 +266,6 @@ class format_visualsections extends format_base {
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }
-        $actchoices = local::get_activity_choices();
-        $siteconf = get_config('format_visualsections');
-        $actopts = [];
-
-        $acts = 5;
-        for ($a = 1; $a <= $acts; $a++) {
-            $actpriority = [
-                'label' => get_string('activitypriority', 'format_visualsections', $a),
-                'help'  => 'activitypriority',
-                'help_component' => 'format_visualsections',
-                'element_type' => 'select',
-                'element_attributes' => [$actchoices]
-            ];
-            $siteval = 'activitypriority'.$a;
-            if (isset($siteconf->$siteval)) {
-                $actpriority['default'] = $siteconf->$siteval;
-            }
-            $actopts['activitypriority'.$a] = $actpriority;
-        }
-        $courseformatoptions += $actopts;
         return $courseformatoptions;
     }
 
