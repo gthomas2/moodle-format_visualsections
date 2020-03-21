@@ -1,0 +1,86 @@
+// Developed at agap2
+// https://codepen.io/agap2_pt/pen/KEayQR
+// Slider based on Google's #1 result:
+// https://codepen.io/mephysto/pen/ZYVKRY
+// And on the RESPONSIVE alternative:
+// http://www.codeply.com/go/s3I9ivCBYH/multi-carousel-single-slide-bootstrap-4
+
+// non-related styling:
+body {
+    background: #333;
+    color: #ddd;
+}
+
+$ci: ".carousel-item";
+
+@media (min-width: 768px) {
+    .multi-item-carousel {
+        .carousel-inner {
+            #{$ci} {
+                // NEW to v4.3.1: all margin-right properties come with -100% as default
+                // causing all hidden items to be out of the screen
+                margin-right: inherit;
+
+                &.active {
+                    + #{$ci},
+                    + #{$ci} + #{$ci} {
+                        display: block; // three visible items
+                    }
+
+                    // prevents opposite direction "animation"
+                    &:not(#{$ci}-right):not(#{$ci}-left),
+                    &:not(#{$ci}-right):not(#{$ci}-left) + #{$ci},
+                    &:not(#{$ci}-right):not(#{$ci}-left) + #{$ci} + #{$ci} {
+                        transition: none;
+                    }
+
+                    // allows new item to be visible in order to "slide in" into place
+                    + #{$ci} + #{$ci} + #{$ci} {
+                        position: absolute;
+                        top: 0;
+                        right: -(percentage(1/3));
+                        z-index: -1;
+                        display: block;
+                        visibility: visible;
+                    }
+                } // .active
+                &-next,
+                &-prev {
+                    position: relative;
+                    transform: translate3d(0, 0, 0);
+                }
+            } // .carousel-item
+
+            // farthest right hidden item must be also positioned for animations
+            #{$ci}-prev#{$ci}-right {
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: -1;
+                display: block;
+                visibility: visible;
+            }
+        } // .carousel-inner
+
+        // left or forward direction
+        .active#{$ci}-left + #{$ci}-next#{$ci}-left,
+        #{$ci}-next#{$ci}-left + #{$ci},
+        #{$ci}-next#{$ci}-left + #{$ci} + #{$ci},
+        #{$ci}-next#{$ci}-left + #{$ci} + #{$ci} + #{$ci} {
+            position: relative;
+            transform: translate3d(-100%, 0, 0);
+            visibility: visible;
+        }
+
+        // right or previous direction
+        .active#{$ci}-right + #{$ci}-prev#{$ci}-right,
+        #{$ci}-prev#{$ci}-right + #{$ci},
+        #{$ci}-prev#{$ci}-right + #{$ci} + #{$ci},
+        #{$ci}-prev#{$ci}-right + #{$ci} + #{$ci} + #{$ci} {
+            position: relative;
+            transform: translate3d(100%, 0, 0);
+            display: block;
+            visibility: visible;
+        }
+    } // multi-item-carousel
+}

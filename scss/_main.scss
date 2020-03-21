@@ -1,0 +1,53 @@
+body.format-visualsections {
+    .course-content ul.visualsections {
+        margin: 0;
+        list-style: none;
+    }
+
+    .course-content ul.visualsections li.section .content {
+        margin: 0 40px;
+    }
+
+    .course-content ul.visualsections li.section .left,
+    .course-content ul.visualsections li.section .right {
+        width: 40px;
+        padding: 0 6px;
+    }
+
+    .course-content ul.visualsections li.section .left {
+        padding-top: 22px;
+        text-align: right;
+    }
+
+    .jsenabled .course-content ul.visualsections li.section .left,
+    .jsenabled .course-content ul.visualsections li.section .right {
+        width: auto;
+    }
+
+    .course-content ul.visualsections li.section .left .section-handle img.icon {
+        padding: 0;
+        vertical-align: baseline;
+    }
+
+    .course-content ul.visualsections li.section .section_action_menu .textmenu,
+    .course-content ul.visualsections li.section .section_action_menu .menu-action-text {
+        white-space: nowrap;
+    }
+}
+
+
+
+.sectionCircle {
+    width: 33%;
+    min-width: 150px;
+}
+
+.subsectiontyperow {
+    margin-bottom: 0.25em;
+    list-style: none;
+}
+
+.subsectiontypes ul {
+    padding-left: 0;
+}
+

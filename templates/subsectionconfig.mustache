@@ -1,0 +1,13 @@
+<div class="subsectiontypes">
+
+    <ul>
+        {{#types}}
+            {{>format_visualsections/subsectiontyperow}}
+        {{/types}}
+    </ul>
+
+    <textarea class="js-data-field" style="display: none" name="{{name}}">{{data}}</textarea>
+
+    <button class="btn btn-secondary js-addsubsection"><i class="fa fa-plus mr-2"></i>{{#str}}addsubsectiontype, format_visualsections{{/str}}</button>
+
+</div>

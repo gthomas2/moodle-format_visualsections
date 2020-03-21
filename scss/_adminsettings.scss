@@ -1,0 +1,19 @@
+#page-admin-setting-formatsettingvisualsections {
+    button.imagethumb {
+        min-width: 2.5em;
+        min-height: 2.5em;
+        background-size: cover;
+        i {
+            opacity: 0.25;
+        }
+    }
+    .subsectiontypes button {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    .subsectiontypes.jsloaded button {
+        pointer-events: all;
+        opacity: 1;
+    }
+}

@@ -24,6 +24,11 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+
+use format_visualsections\form\subsection;
+use format_visualsections\model\subsection as subsectionmodel;
+use format_visualsections\service\section;
+
 require_once($CFG->dirroot. '/course/format/lib.php');
 
 /**
@@ -42,6 +47,83 @@ class format_visualsections extends format_base {
      */
     public function uses_sections() {
         return true;
+    }
+
+    /**
+     * SQL for getting sections with parents.
+     * @return string
+     */
+    private function sql_section_parents(): string {
+        $sql = "FROM {course_sections} cs
+           LEFT JOIN {course_format_options} fo ON fo.sectionid = cs.id AND fo.name='parentid'
+           LEFT JOIN {course_format_options} fo2 ON fo2.sectionid = cs.id AND fo2.name='typecode'
+               WHERE cs.course = ?";
+        return $sql;
+    }
+
+    /**
+     * Get last section number.
+     * @return int
+     * @throws dml_exception
+     */
+    public function get_last_section_number(): int {
+        global $DB;
+
+        // Count non-parent rows.
+        $parentsql = $this->sql_section_parents();
+        $sql = "SELECT count(cs.id) 
+                $parentsql AND fo.id IS NULL";
+
+        return $DB->count_records_sql($sql, [$this->courseid]);
+    }
+
+    /**
+     * Get sections including the parentid field.
+     * @return array|null
+     * @throws dml_exception
+     */
+    public function get_sections_with_parentid(): ?array {
+        global $DB;
+
+        // Static caching for performance.
+        static $rs = null;
+
+        if ($rs !== null) {
+            return $rs;
+        }
+
+        $parentsql = $this->sql_section_parents();
+        $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode
+                $parentsql";
+
+        $rs = $DB->get_records_sql($sql, [$this->courseid]);
+        return $rs ? $rs : null;
+    }
+
+    /**
+     * Note, that hierarchy is only one sub section deep.
+     * @return array
+     */
+    public function get_section_hierarchy(): array {
+        $subsections = [];
+        $rootsections = [];
+        $sections = $this->get_sections_with_parentid();
+        foreach ($sections as $section) {
+            if (!empty($section->parentid)) {
+                if (empty($subsections[$section->parentid])) {
+                    $subsections[$section->parentid] = [];
+                }
+                $subsections[$section->parentid][$section->id] = $section;
+            } else {
+                $rootsections[$section->id] = $section;
+            }
+        }
+        foreach ($rootsections as $rootsection) {
+            if (isset($subsections[$rootsection->id])) {
+                $rootsection->children = $subsections[$rootsection->id];
+            }
+        }
+        return $rootsections;
     }
 
     /**
@@ -212,6 +294,20 @@ class format_visualsections extends format_base {
         );
     }
 
+    public function section_format_options($foreditform = false) {
+        $options = [
+            'parentid' => [
+                'default' => 0,
+                'type' => PARAM_INT
+            ],
+            'typecode' => [
+                'default' => '',
+                'type' => PARAM_ALPHANUMEXT
+            ]
+        ];
+        return $options;
+    }
+
     /**
      * Definitions of the additional options that this course format uses for course
      *
@@ -234,7 +330,7 @@ class format_visualsections extends format_base {
                 'coursedisplay' => array(
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
-                ),
+                )
             );
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
@@ -429,4 +525,133 @@ function format_visualsections_inplace_editable($itemtype, $itemid, $newvalue) {
             array($itemid, 'visualsections'), MUST_EXIST);
         return course_get_format($section->course)->inplace_editable_update_section_name($section, $itemtype, $newvalue);
     }
+}
+
+/**
+ * Serve the edit form as a fragment.
+ *
+ * @param array $args List of named arguments for the fragment loader.
+ * @return string
+ */
+function format_visualsections_output_fragment_subsection_form($args) {
+    global $PAGE, $CFG;
+
+    $output = $PAGE->get_renderer('core', '', RENDERER_TARGET_GENERAL);
+
+    $data = null;
+    $ajaxdata = null;
+    if (!empty($args['formdata'])) {
+        $data = [];
+        parse_str($args['formdata'], $data);
+        if ($data) {
+            $ajaxdata = $data;
+        }
+    }
+
+    $actionurl = '#';
+    // Pass the source type as custom data so it can by used to detetmine the type of edit.
+    $customdata = null;
+    $form = new subsection($actionurl, $customdata,
+        'post', '', null, true, $ajaxdata);
+    $form->validate_defined_fields(true);
+    $form->set_data($data);
+
+    $msg = '';
+    if (!empty($ajaxdata)) {
+        if ($form->is_validated()) {
+            // Add or update a subsection.
+            $upsertresult = section::instance()->upsert_subsection(subsectionmodel::from_data($ajaxdata));
+            $id = $upsertresult->subsectionid;
+            if ($id) {
+                $data['id'] = $id;
+                // We need to recreate the form so that we can set the id field.
+                $form = new subsection($actionurl, $customdata,
+                    'post', '', null, true, $data);
+                $form->set_data($data);
+                $msg = $output->notification(get_string('subsectioncreated', 'mod_tlevent'), 'notifysuccess');
+            } else {
+                $msg = $output->notification(get_string('subsectioncreatefailed', 'mod_tlevent'), 'notifyproblem');
+            }
+        }
+    }
+    return $form->render().$msg;
+}
+
+function format_visualsections_output_fragment_filepicker($args) {
+    global $PAGE, $OUTPUT;
+
+    $fargs = new \stdClass();
+    $fargs->accepted_types = ['.png', '.jpg', '.gif', '.webp', '.svg'];
+    $fargs->itemid = file_get_unused_draft_itemid();
+    $fargs->maxbytes = 0;
+    $fargs->context = \context_system::instance();
+    $fargs->buttonname = 'choose';
+
+    $fp = new \file_picker($fargs);
+    $options = $fp->options;
+    $options->context = $PAGE->context;
+    $module = [
+        'name' => 'form_filepicker',
+        'fullpath' => '/lib/form/filepicker.js',
+        'requires' => [
+            'core_filepicker',
+            'node',
+            'node-event-simulate',
+            'core_dndupload'
+        ]
+    ];
+    $PAGE->requires->js_init_call('M.form_filepicker.init', array($fp->options), true, $module);
+    return $OUTPUT->render($fp);
+}
+
+
+/**
+ * Server format visual sections pluginfile.
+ * @param $course
+ * @param $cm
+ * @param context $context
+ * @param $filearea
+ * @param $args
+ * @param $forcedownload
+ * @param array $options
+ * @return bool
+ * @throws coding_exception
+ * @throws moodle_exception
+ * @throws require_login_exception
+ */
+function format_visualsections_pluginfile($course,
+                           $cm,
+                           context $context,
+                           $filearea,
+                           $args,
+                           $forcedownload,
+                           array $options=array()) {
+
+    if ($context->contextlevel != CONTEXT_SYSTEM) {
+        return false;
+    }
+
+    require_login($course, false, $cm);
+    if (!has_capability('moodle/site:config', $context)) {
+        return false;
+    }
+
+    $itemid = (int)array_shift($args);
+    if ($itemid != 0) {
+        return false;
+    }
+
+    $args = array_map(function($arg) {
+        return urldecode($arg);
+    }, $args);
+
+    $relativepath = implode('/', $args);
+
+    $fullpath = "/{$context->id}/format_visualsections/$filearea/$itemid/$relativepath";
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+    send_stored_file($file, 0, 0, $forcedownload, $options);
 }

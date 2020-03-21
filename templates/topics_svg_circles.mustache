@@ -1,0 +1,27 @@
+<div style="position: absolute; width: 1px; height: 1px">
+    <svg>
+        <defs>
+            {{#imageurls}}
+                <pattern id="{{code}}" x="0%" y="0%" height="100%" width="100%"
+                         viewBox="0 0 512 512">
+                    <image x="0%" y="0%" width="512" height="512" xlink:href="{{{url}}}" transform="translate(512 512) rotate(-90) scale(1 -1)"></image>
+                </pattern>
+            {{/imageurls}}
+        </defs>
+    </svg>
+</div>
+
+<div class="container">
+    <div class="carousel slide multi-item-carousel" id="theCarousel">
+        <div class="carousel-inner row w-100 mx-auto">
+            {{#topics}}
+                <svg class="sectionCircle" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}">
+                    <circle cx="400" cy="400" r="360" fill="none" stroke="#f00" stroke-width="4"/>
+                    <circle class="progress" transform=" translate(400 400) rotate(-90) scale(1 -1)" cx="0" cy="0" r="370" fill="none" stroke="#f00" stroke-width="20"/>
+                    <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
+                    </g>
+                </svg>
+            {{/topics}}
+        </div>
+    </div>
+</div>

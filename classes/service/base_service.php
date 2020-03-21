@@ -15,16 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Base service.
  *
- * @package    format
- * @subpackage visualsections
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com) / Guy Thomas (citri.city)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     format_visualsections
+ * @author      Guy Thomas
+ * @copyright   Copyright (c) 2020 Citricity Ltd
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace format_visualsections\service;
 
-$plugin->version   = 2020022802;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2019111200;        // Requires this Moodle version.
-$plugin->component = 'format_visualsections';    // Full name of the plugin (used for diagnostics).
+defined('MOODLE_INTERNAL') || die;
+
+abstract class base_service {
+
+    protected function __construct() {}
+
+    public static function instance(): base_service {
+        static $instances = [];
+        $class = get_called_class();
+        if (!empty($instances[$class])) {
+            return $instances[$class];
+        }
+        $instance = new $class();
+        $instances[$class] = $instance;
+        return $instance;
+    }
+}

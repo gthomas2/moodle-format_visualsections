@@ -1,0 +1,15 @@
+<li class="subsectiontyperow" data-pos="{{pos}}">
+    <button class="btn btn-secondary js-removesubsection" aria-label="{{#str}}removesubsectiontype, format_visualsections, {{code}}{{/str}}"><i class="fa fa-minus"></i></button>
+    {{#str}}code, format_visualsections{{/str}}: <input name="code{{pos}}" value="{{code}}" />
+    {{#str}}name, format_visualsections{{/str}}: <input name="name{{pos}}" value="{{name}}" />
+    {{#image}}
+        <button class="btn btn-secondary js-setimage imagethumb" aria-label="{{#str}}addimagetosubsectiontype, format_visualsections{{/str}}" data-imgsrc="{{{image}}}" style="background-image:url({{{image}}})">
+            <i class="fa fa-image"></i>
+        </button>
+    {{/image}}
+    {{^image}}
+        <button class="btn btn-secondary js-setimage" aria-label="{{#str}}addimagetosubsectiontype, format_visualsections{{/str}}" data-imgsrc="">
+            <i class="fa fa-image"></i>
+        </button>
+    {{/image}}
+</li>
