@@ -4,6 +4,7 @@ namespace format_visualsections\service;
 defined('MOODLE_INTERNAL') || die;
 
 use format_visualsections\model\subsection;
+use format_visualsections\model\subsectiontype;
 
 require_once __DIR__.'/../../../../../course/lib.php';
 require_once __DIR__.'/../../lib.php';
@@ -95,5 +96,36 @@ class section extends base_service {
             'success' => true,
             'imagefile' => $fileurl
         ];
+    }
+
+    /**
+     * Take config data string and convert it to types array.
+     * @param null|string $data
+     * @return subsectiontype[]
+     */
+    public function config_to_types_array(?string $data = null): array {
+        if ($data === null) {
+            $data = get_config('format_visualsections', 'subsectiontypes');
+        }
+        $types = [];
+        $items = explode("\n", $data);
+        $i = 0;
+        foreach ($items as $item) {
+            if (empty($item)) {
+                continue;
+            }
+            $tmparr = explode('|', $item);
+            $img = $tmparr[2] ?? null;
+            $img = trim($img);
+            $img = empty($img) ? null : $img;
+            $types[$tmparr[0]] = subsectiontype::from_data([
+                'code' => $tmparr[0],
+                'name' => $tmparr[1],
+                'image' => $img,
+                'pos' => $i
+            ]);
+            $i++;
+        }
+        return $types;
     }
 }

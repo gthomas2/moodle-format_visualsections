@@ -59,3 +59,5 @@ if (!empty($displaysection)) {
 
 // Include course format js module
 $PAGE->requires->js('/course/format/visualsections/format.js');
+
+$PAGE->requires->js_call_amd('format_visualsections/carousel', 'init');

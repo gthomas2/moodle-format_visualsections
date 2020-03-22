@@ -1,0 +1,14 @@
+.carousel-control-prev, .carousel-control-next {
+    width: 12.5%;
+    i {
+        color: red;
+        font-size: 4em;
+    }
+}
+
+.carousel-indicators.carousel-indicators-relative {
+    position: relative;
+    li {
+        background-color: red;
+    }
+}

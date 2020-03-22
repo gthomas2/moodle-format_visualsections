@@ -33,12 +33,16 @@ body.format-visualsections {
     .course-content ul.visualsections li.section .section_action_menu .menu-action-text {
         white-space: nowrap;
     }
+
+    .subsection-icon {
+        max-width: 2em;
+        height: auto;
+        margin-right: 1em;
+    }
 }
 
-
-
 .sectionCircle {
-    width: 33%;
+    width: 32%;
     min-width: 150px;
 }
 

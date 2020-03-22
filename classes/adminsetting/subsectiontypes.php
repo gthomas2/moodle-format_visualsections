@@ -7,6 +7,7 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/adminlib.php');
 
 use format_visualsections\model\subsectiontype;
+use format_visualsections\service\section;
 
 /**
  * Class sectionconfig
@@ -29,34 +30,6 @@ class subsectiontypes extends \admin_setting_configtext {
     }
 
     /**
-     * Take config data string and convert it to types array.
-     * @param null|string $data
-     * @return subsectiontype[]
-     */
-    public static function config_to_types_array(?string $data = null): array {
-        $types = [];
-        $items = explode("\n", $data);
-        $i = 0;
-        foreach ($items as $item) {
-            if (empty($item)) {
-                continue;
-            }
-            $tmparr = explode('|', $item);
-            $img = $tmparr[2] ?? null;
-            $img = trim($img);
-            $img = empty($img) ? null : $img;
-            $types[] = subsectiontype::from_data([
-                'code' => $tmparr[0],
-                'name' => $tmparr[1],
-                'image' => $img,
-                'pos' => $i
-            ]);
-            $i++;
-        }
-        return $types;
-    }
-
-    /**
      * Return an XHTML string for the setting
      * @return string Returns an XHTML string
      */
@@ -65,7 +38,9 @@ class subsectiontypes extends \admin_setting_configtext {
 
         $PAGE->requires->js_call_amd('format_visualsections/adminsetting_subsectiontypes', 'init');
 
-        $types = self::config_to_types_array($data);
+        $svc = section::instance();
+
+        $types = $svc->config_to_types_array($data);
 
         $default = $this->get_defaultsetting();
         $context = (object) [

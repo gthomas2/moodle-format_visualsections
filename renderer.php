@@ -28,7 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 
 use format_visualsections\service\section;
 use format_visualsections\model\imageurl;
-use format_visualsections\adminsetting\subsectiontypes;
 use format_visualsections\model\topics_svg_circles;
 use format_visualsections\model\topic;
 use format_visualsections\model\subsection;
@@ -84,7 +83,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $this->init_subsection_types();
 
         $data = get_config('format_visualsections', 'subsectiontypes');
-        $typesarr = subsectiontypes::config_to_types_array($data);
+        $typesarr = $this->sectionservice->config_to_types_array($data);
 
         $imageurls = [];
         foreach ($typesarr as $type) {
@@ -98,6 +97,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $sectionhierarchy = $format->get_section_hierarchy();
 
         $topics = [];
+        $firstsection = null;
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -109,6 +109,9 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 // Skip sub sections.
                 continue;
             }
+
+            $firstsection = $firstsection ?? $section;
+
             $progress = 50; // TODO.
 
             $subsections = $sectionhierarchy[$section->id]->children ?? [];
@@ -123,9 +126,19 @@ class format_visualsections_renderer extends format_section_renderer_base {
                     break;
                 }
             }
-            $topics[] = new topic($progress, json_encode($subtopics));
+            $cssclass = $firstsection === $section ? 'active' : '';
+            $topics[] = new topic($progress, json_encode($subtopics), $cssclass);
         }
-        $data = new topics_svg_circles($imageurls, $topics);
+        $topicgroups = array_chunk($topics, 3); // Three topics per group.
+        foreach ($topicgroups as $idx => $group) {
+            $cssclass = $idx === 0 ? 'active' : '';
+            $topicgroups[$idx] = (object) [
+                'topics' => $group,
+                'cssclass' => $cssclass,
+                'index' => $idx
+            ];
+        }
+        $data = new topics_svg_circles($imageurls, $topicgroups);
 
         $visualsections = $this->render_from_template('format_visualsections/topics_svg_circles', $data);
 
@@ -291,6 +304,8 @@ SECTION;
         $modinfo = get_fast_modinfo($course);
         $course = course_get_format($course)->get_course();
 
+        $subsectiontypes = $this->sectionservice->config_to_types_array();
+
         $context = context_course::instance($course->id);
         // Title with completion help icon.
         $completioninfo = new completion_info($course);
@@ -338,13 +353,17 @@ SECTION;
                             $subsectionclass = 'typeclass-'.$subsection->typecode;
                             $cardbody = $this->courserenderer->course_section_cm_list($course, $subsection->section, null);
                             $cardbody .= $this->courserenderer->course_section_add_cm_control($course, $subsection->section, null);
+                            $typecode = $subsection->typecode;
+                            $type = $subsectiontypes[$typecode];
+                            $imageurl = $type->image;
+
                             // TODO - template.
                             $subsectionhtml = <<<HTML
   <div id ="$subsectionid" class="card subsection $subsectionclass">
     <div class="card-header" id="$headingid">
       <h2 class="mb-0">
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#$collapseid" aria-expanded="true" aria-controls="$collapseid">
-          $subsectiontitle
+          <img src="$imageurl" class="subsection-icon"/>$subsectiontitle
         </button>
       </h2>
     </div>

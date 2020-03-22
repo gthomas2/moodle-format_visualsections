@@ -12,16 +12,35 @@
 </div>
 
 <div class="container">
-    <div class="carousel slide multi-item-carousel" id="theCarousel">
-        <div class="carousel-inner row w-100 mx-auto">
-            {{#topics}}
-                <svg class="sectionCircle" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}">
-                    <circle cx="400" cy="400" r="360" fill="none" stroke="#f00" stroke-width="4"/>
-                    <circle class="progress" transform=" translate(400 400) rotate(-90) scale(1 -1)" cx="0" cy="0" r="370" fill="none" stroke="#f00" stroke-width="20"/>
-                    <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
-                    </g>
-                </svg>
-            {{/topics}}
+    <div class="carousel slide" id="section-carousel">
+        <div class="carousel-inner row w-75 mx-auto">
+            {{#topicgroups}}
+                <div class="carousel-item {{cssclass}}">
+                    <div>
+                    {{#topics}}
+                        <svg class="sectionCircle" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}">
+                            <circle cx="400" cy="400" r="360" fill="none" stroke="#f00" stroke-width="4"/>
+                            <circle class="progress" transform=" translate(400 400) rotate(-90) scale(1 -1)" cx="0" cy="0" r="370" fill="none" stroke="#f00" stroke-width="20"/>
+                            <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
+                            </g>
+                        </svg>
+                    {{/topics}}
+                    </div>
+                </div>
+            {{/topicgroups}}
         </div>
+        <a class="carousel-control-prev" href="#section-carousel" role="button" data-slide="prev">
+            <i class="fa fa-chevron-left"></i>
+            <span class="sr-only">Previous</span>{{!TODO}}
+        </a>
+        <a class="carousel-control-next" href="#section-carousel" role="button" data-slide="next">
+            <i class="fa fa-chevron-right"></i>
+            <span class="sr-only">Next</span>{{!TODO}}
+        </a>
+        <ol class="carousel-indicators carousel-indicators-relative">
+            {{#topicgroups}}
+                <li data-target="#carouselExampleIndicators" data-slide-to="{{index}}" class="{{cssclass}}"></li>
+            {{/topicgroups}}
+        </ol>
     </div>
 </div>
