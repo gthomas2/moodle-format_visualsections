@@ -1,14 +1,19 @@
-.carousel-control-prev, .carousel-control-next {
-    width: 12.5%;
-    i {
-        color: red;
-        font-size: 4em;
-    }
-}
+body.format-visualsections {
 
-.carousel-indicators.carousel-indicators-relative {
-    position: relative;
-    li {
-        background-color: red;
+    .carousel-control-prev, .carousel-control-next {
+        width: 12.5%;
+        i {
+            color: red;
+            font-size: 4em;
+        }
     }
+
+    .carousel-indicators.carousel-indicators-relative {
+        position: relative;
+        margin-top: 2em;
+        li {
+            background-color: red;
+        }
+    }
+
 }

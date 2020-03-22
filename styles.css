@@ -14,15 +14,16 @@
   pointer-events: all;
   opacity: 1; }
 
-.carousel-control-prev, .carousel-control-next {
+body.format-visualsections .carousel-control-prev, body.format-visualsections .carousel-control-next {
   width: 12.5%; }
-  .carousel-control-prev i, .carousel-control-next i {
+  body.format-visualsections .carousel-control-prev i, body.format-visualsections .carousel-control-next i {
     color: red;
     font-size: 4em; }
 
-.carousel-indicators.carousel-indicators-relative {
-  position: relative; }
-  .carousel-indicators.carousel-indicators-relative li {
+body.format-visualsections .carousel-indicators.carousel-indicators-relative {
+  position: relative;
+  margin-top: 2em; }
+  body.format-visualsections .carousel-indicators.carousel-indicators-relative li {
     background-color: red; }
 
 body.format-visualsections .course-content ul.visualsections {
