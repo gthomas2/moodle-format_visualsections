@@ -40,7 +40,7 @@ class subsectiontypes extends \admin_setting_configtext {
 
         $svc = section::instance();
 
-        $types = $svc->config_to_types_array($data);
+        $types = array_values($svc->config_to_types_array($data));
 
         $default = $this->get_defaultsetting();
         $context = (object) [

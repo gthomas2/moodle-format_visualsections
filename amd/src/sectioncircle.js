@@ -78,7 +78,7 @@ define(['jquery'], function($) {
                     }
 
                     switch (segments.length) {
-                        case 1: rectSize = r*1.5; break;
+                        case 1: rectSize = r*1.3; break;
                         case 2: rectSize = r/1.25; break;
                         case 3: rectSize = r/1.5; break;
                         case 4: rectSize = r/1.75; break;
@@ -118,10 +118,11 @@ define(['jquery'], function($) {
                                 .appendTo($(arcsEl));
                             $(arcsEl).html($(arcsEl).html());
                         }
-                    }else {
+                    } else {
+                        const typeCode = segments[0].typecode;
                         var x = -rectSize/2;
                         var y = -rectSize/2;
-                        $(`<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#image)" />`)
+                        $(`<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#${typeCode})" />`)
                             .appendTo($(arcsEl));
                         $(arcsEl).html($(arcsEl).html());
                     }

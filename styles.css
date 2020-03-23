@@ -17,14 +17,14 @@
 body.format-visualsections .carousel-control-prev, body.format-visualsections .carousel-control-next {
   width: 12.5%; }
   body.format-visualsections .carousel-control-prev i, body.format-visualsections .carousel-control-next i {
-    color: red;
+    color: grey;
     font-size: 4em; }
 
 body.format-visualsections .carousel-indicators.carousel-indicators-relative {
   position: relative;
   margin-top: 2em; }
   body.format-visualsections .carousel-indicators.carousel-indicators-relative li {
-    background-color: red; }
+    background-color: grey; }
 
 body.format-visualsections .course-content ul.visualsections {
   margin: 0;
@@ -58,6 +58,12 @@ body.format-visualsections .subsection-icon {
   max-width: 2em;
   height: auto;
   margin-right: 1em; }
+
+body.format-visualsections #page-course-editsection #fitem_id_parentid, body.format-visualsections #page-course-editsection #fitem_id_typecode {
+  display: none; }
+
+body.format-visualsections li.section {
+  margin-bottom: 2em; }
 
 .sectionCircle {
   width: 32%;

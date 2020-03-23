@@ -39,6 +39,16 @@ body.format-visualsections {
         height: auto;
         margin-right: 1em;
     }
+
+    #page-course-editsection {
+        #fitem_id_parentid, #fitem_id_typecode {
+            display: none;
+        }
+    }
+
+    li.section {
+        margin-bottom: 2em;
+    }
 }
 
 .sectionCircle {

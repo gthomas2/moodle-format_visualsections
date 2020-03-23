@@ -55,3 +55,5 @@ $string['name'] = 'Name';
 $string['addsubsectiontype'] = 'Add new subsection type';
 $string['removesubsectiontype'] = 'Remove subsection type "{$a}"';
 $string['addimagetosubsectiontype'] = 'Add image to subsection type';
+$string['label:parentid'] = 'Parent id';
+$string['label:typecode'] = 'Type code';

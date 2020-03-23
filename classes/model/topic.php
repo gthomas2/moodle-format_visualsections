@@ -22,12 +22,17 @@ class topic extends base_model {
     public $cssclass;
 
     /**
+     * @var string
+     */
+    public $strokecolor;
+
+    /**
      * Topic constructor.
      * @param int $progress
      * @param string $subtopicsjson - json data
      * @param string $cssclass
      */
-    public function __construct(int $progress, string $subtopicsjson, string $cssclass) {
+    public function __construct(int $progress, string $subtopicsjson, string $cssclass, string $strokecolor) {
         $this->set_props_construct_args(func_get_args());
     }
 

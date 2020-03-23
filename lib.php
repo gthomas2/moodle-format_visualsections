@@ -298,11 +298,13 @@ class format_visualsections extends format_base {
         $options = [
             'parentid' => [
                 'default' => 0,
-                'type' => PARAM_INT
+                'type' => PARAM_INT,
+                'label' => get_string('label:parentid', 'format_visualsections'),
             ],
             'typecode' => [
                 'default' => '',
-                'type' => PARAM_ALPHANUMEXT
+                'type' => PARAM_ALPHANUMEXT,
+                'label' => get_string('label:typecode', 'format_visualsections')
             ]
         ];
         return $options;
@@ -632,9 +634,6 @@ function format_visualsections_pluginfile($course,
     }
 
     require_login($course, false, $cm);
-    if (!has_capability('moodle/site:config', $context)) {
-        return false;
-    }
 
     $itemid = (int)array_shift($args);
     if ($itemid != 0) {

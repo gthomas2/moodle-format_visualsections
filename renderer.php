@@ -73,6 +73,55 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     /**
+     * Go though all section sub sections and get mods.
+     * @param $parentsection
+     * @return cm_info[]
+     */
+    protected function get_section_mods($parentsection) {
+        global $COURSE;
+
+        $format = course_get_format($COURSE);
+        $modinfo = $parentsection->modinfo;
+        $mods = [];
+        $sectionhierarchy = $format->get_section_hierarchy();
+        $subsections = $sectionhierarchy[$parentsection->id]->children ?? [];
+        if (!empty($subsections)) {
+            foreach ($subsections as $subsection) {
+                if (!empty($modinfo->sections[$subsection->section])) {
+                    foreach ($modinfo->sections[$subsection->section] as $modnumber) {
+                        $mods[] = $modinfo->cms[$modnumber];
+                    }
+                }
+            }
+        }
+        return $mods;
+    }
+
+    protected function section_completion_progress($parentsection) {
+        global $COURSE, $USER;
+        $mods = $this->get_section_mods($parentsection);
+        $completion = new completion_info($COURSE);
+        $countcomplete = 0;
+        if (!empty($mods)) {
+            foreach ($mods as $mod) {
+                $activitycompletiondata = $completion->get_data($mod, false, $USER->id);
+                $complete = $activitycompletiondata->completionstate === COMPLETION_COMPLETE;
+                $countcomplete += $complete ? 1 : 0;
+            }
+        } else {
+            return false; // Must have mods to be completable.
+        }
+        if ($countcomplete === 0) {
+            return false;
+        }
+        return ($countcomplete / count($mods)) * 100;
+    }
+
+    protected function section_complete($parentsection) {
+        return $this->section_completion_progress($parentsection) === 100;
+    }
+
+    /**
      * Generate the starting container html for a list of sections
      * @return string HTML to output.
      */
@@ -98,6 +147,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
         $topics = [];
         $firstsection = null;
+        $prevsectioncomplete = false;
+        $prevsection = null;
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -110,9 +161,12 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 continue;
             }
 
-            $firstsection = $firstsection ?? $section;
+            $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
 
-            $progress = 50; // TODO.
+            $firstsection = $firstsection ?? $section;
+            $isfirstsection = $firstsection === $section;
+
+            $progress = $this->section_completion_progress($section);
 
             $subsections = $sectionhierarchy[$section->id]->children ?? [];
 
@@ -126,8 +180,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
                     break;
                 }
             }
-            $cssclass = $firstsection === $section ? 'active' : '';
-            $topics[] = new topic($progress, json_encode($subtopics), $cssclass);
+            $cssclass = $isfirstsection ? 'active' : '';
+            $strokecolor = $isfirstsection || ($section->available && $prevsectioncomplete) ? '#f00' : '#eee';
+            $topics[] = new topic($progress, json_encode($subtopics), $cssclass, $strokecolor);
+            $prevsection = $section;
         }
         $topicgroups = array_chunk($topics, 3); // Three topics per group.
         foreach ($topicgroups as $idx => $group) {
