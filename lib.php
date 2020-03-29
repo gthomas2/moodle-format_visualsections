@@ -94,7 +94,8 @@ class format_visualsections extends format_base {
 
         $parentsql = $this->sql_section_parents();
         $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode
-                $parentsql";
+                $parentsql
+                ORDER BY cs.section";
 
         $rs = $DB->get_records_sql($sql, [$this->courseid]);
         return $rs ? $rs : null;
@@ -107,6 +108,7 @@ class format_visualsections extends format_base {
     public function get_section_hierarchy(): array {
         $subsections = [];
         $rootsections = [];
+
         $sections = $this->get_sections_with_parentid();
         foreach ($sections as $section) {
             if (!empty($section->parentid)) {
@@ -305,6 +307,11 @@ class format_visualsections extends format_base {
                 'default' => '',
                 'type' => PARAM_ALPHANUMEXT,
                 'label' => get_string('label:typecode', 'format_visualsections')
+            ],
+            'size' => [
+                'default' => 's',
+                'type' => PARAM_ALPHA,
+                'label' => get_string('label:size', 'format_visualsections')
             ]
         ];
         return $options;
@@ -536,7 +543,7 @@ function format_visualsections_inplace_editable($itemtype, $itemid, $newvalue) {
  * @return string
  */
 function format_visualsections_output_fragment_subsection_form($args) {
-    global $PAGE, $CFG;
+    global $PAGE, $DB;
 
     $output = $PAGE->get_renderer('core', '', RENDERER_TARGET_GENERAL);
 
@@ -548,6 +555,13 @@ function format_visualsections_output_fragment_subsection_form($args) {
         if ($data) {
             $ajaxdata = $data;
         }
+        if (empty($ajaxdata['parentid']) && !empty($ajaxdata['id'])) {
+            $subsection = $DB->get_record('course_sections', ['id' => $ajaxdata['id']]);
+            $format = \format_visualsections::instance($ajaxdata['course']);
+            $options = $format->get_format_options($subsection);
+            $ajaxdata = (array) $subsection + $options;
+        }
+        $data = $ajaxdata;
     }
 
     $actionurl = '#';

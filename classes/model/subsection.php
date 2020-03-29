@@ -8,12 +8,23 @@ class subsection extends base_model {
     /**
      * @var int
      */
-    public $id;
+    public $parentid;
+
+    /**
+     * @var string
+     */
+    public $typecode;
+
+    /**
+     * @var string
+     */
+    public $size;
 
     /**
      * @var int
      */
-    public $parentid;
+    public $id;
+
 
     /**
      * @var string
@@ -23,7 +34,7 @@ class subsection extends base_model {
     /**
      * @var string
      */
-    public $typecode;
+    public $link;
 
     /**
      * Subsection constructor.
@@ -32,7 +43,13 @@ class subsection extends base_model {
      * @param string $type
      * @param int|null $id
      */
-    public function __construct(int $parentid, string $typecode, ?string $name = null, ?int $id = null) {
+    public function __construct(
+        int     $parentid,
+        string  $typecode,
+        string  $size,
+        ?string $name = null,
+        ?int    $id = null,
+        ?string $link = null) {
         $this->set_props_construct_args(func_get_args());
     }
 

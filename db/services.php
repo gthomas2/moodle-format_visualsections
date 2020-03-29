@@ -39,5 +39,13 @@ $functions = [
         'type'          => 'write',
         'ajax'          => true,
         'loginrequired' => true
+    ],
+    'format_visualsections_move_subtopic' => [
+        'classname'     => format_visualsections\webservice\move_subtopic::class,
+        'methodname'    => 'service',
+        'description'   => 'Move subtopic',
+        'type'          => 'write',
+        'ajax'          => true,
+        'loginrequired' => true
     ]
 ];

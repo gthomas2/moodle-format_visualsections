@@ -1,0 +1,33 @@
+<div id ="subsection{{id}}" class="card subsection {{class}}" data-subsection-id="{{id}}">
+    <div class="card-header" id="{{headingid}}">
+        {{#editmode}}
+            <div class="subsection-actions">
+                <button data-direction="up" class="btn btn-link js-move-subsection move-up" aria-label="{{#str}}movesubsectionup, format_visualsections{{/str}}">
+                    <i class="fa fa-arrow-up"></i>
+                </button>
+                <button data-direction="down" class="btn btn-link js-move-subsection move-down" aria-label="{{#str}}movesubsectiondown, format_visualsections{{/str}}">
+                    <i class="fa fa-arrow-down"></i>
+                </button>
+                <a class="btn btn-link" href="{{{deleteurl}}}">
+                    <i class="fa fa-trash js-trash-subsection"></i>
+                </a>
+                <button class="btn btn-link js-edit-subsection" aria-label="{{#str}}editsubsection, format_visualsections{{/str}}">
+                    <i class="fa fa-edit"></i>
+                </button>
+            </div>
+        {{/editmode}}
+        <h2 class="mb-0">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#{{collapseid}}" aria-expanded="true" aria-controls="{{collapseid}}">
+                <img src="{{imageurl}}" class="subsection-icon"/>{{title}}
+            </button>
+        </h2>
+    </div>
+
+    <div id="{{collapseid}}" class="section collapse {{#show}}show{{/show}}" aria-labelledby="{{headingid}}" data-parent="#{{subsectionsid}}">
+        <div class="card-body content">
+            <ul> <!-- This is here purely to satisfy SECTIONLI in actions.js-->
+                {{{cardbody}}}
+            </ul>
+        </div>
+    </div>
+</div>

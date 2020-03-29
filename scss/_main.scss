@@ -1,4 +1,15 @@
 body.format-visualsections {
+
+    &#page-course-editsection {
+        #fitem_id_parentid, #fitem_id_typecode, #fitem_id_size {
+            display: none;
+        }
+    }
+
+    &:not(.editing) .subsection li.section > div.content h3.sectionname {
+        display: none;
+    }
+
     .course-content ul.visualsections {
         margin: 0;
         list-style: none;
@@ -34,34 +45,75 @@ body.format-visualsections {
         white-space: nowrap;
     }
 
+    // By default, students don't see all the sections - just the active ones.
+    ul.visualsections > li.section {
+        display: none;
+        &.active {
+            display: block;
+        }
+    }
+
+    // By default, teachers see all the sections.
+    ul.visualsections.capcourseupdate li.section {
+        display: block;
+    }
+
     .subsection-icon {
         max-width: 2em;
         height: auto;
         margin-right: 1em;
     }
 
-    #page-course-editsection {
-        #fitem_id_parentid, #fitem_id_typecode {
-            display: none;
-        }
-    }
-
     li.section {
         margin-bottom: 2em;
     }
-}
 
-.sectionCircle {
-    width: 32%;
-    min-width: 150px;
-}
+    h3.sectiontitle {
+        font-size: 1rem;
+    }
 
-.subsectiontyperow {
-    margin-bottom: 0.25em;
-    list-style: none;
-}
+    .subsectiontyperow {
+        margin-bottom: 0.25em;
+        list-style: none;
+    }
 
-.subsectiontypes ul {
-    padding-left: 0;
+    .subsectiontypes ul {
+        padding-left: 0;
+    }
+
+    .subsection.yui3-dd-drop-active-invalid .section.collapse{
+        display: block;
+    }
+
+    .section-circle {
+        width: 32%;
+        min-width: 150px;
+        display: inline-block;
+        position: relative;
+        &.locked i.fa-lock {
+            position: absolute;
+            top: 0.5em;
+            right: 0.5em;
+            font-size: 2em;
+            color: #ccc;
+        }
+    }
+
+    .card-header h2 button {
+        width: 100%;
+        text-align: left;
+    }
+
+    ul li.section:last-of-type .subsection:last-of-type .move-down {
+        display: none;
+    }
+
+    ul li.section:nth-of-type(2) .subsection:first-of-type .move-up {
+        display: none;
+    }
+
+    .subsection .section .card-body > ul {
+        list-style: none;
+    }
 }
 

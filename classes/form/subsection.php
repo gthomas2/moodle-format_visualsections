@@ -52,7 +52,7 @@ class subsection extends moodleform {
             'm' => get_string('size:m', 'format_visualsections'),
             'l' => get_string('size:l', 'format_visualsections')
         ];
-        $mform->addElement('select', 'type', get_string('subsectionsize', 'format_visualsections'), $opts);
-        $mform->addRule('type', get_string('required'), 'required');
+        $mform->addElement('select', 'size', get_string('subsectionsize', 'format_visualsections'), $opts);
+        $mform->addRule('size', get_string('required'), 'required');
     }
 }

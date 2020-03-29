@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Add subtopic webservice
+ * Move subtopic webservice
  * @package     format_visualsections
  * @author      Guy Thomas
  * @copyright   Copyright (c) 2020 Citricity Ltd
@@ -31,20 +31,23 @@ use format_visualsections\service\section;
 require_once(__DIR__ . '/../../../../../lib/externallib.php');
 
 /**
- * Add subtopic webservice
+ * Move subtopic webservice
  * @package     format_visualsections
  * @author      Guy Thomas
  * @copyright   Copyright (c) 2020 Citricity Ltd
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class add_subtopic extends \external_api {
+class move_subtopic extends \external_api {
     /**
      * @return \external_function_parameters
      */
     public static function service_parameters() {
         $parameters = [
-            'parentsectionid' => new \external_value(PARAM_INT, 'Parent section id', VALUE_REQUIRED),
-            'subsectiontype' => new \external_value(PARAM_ALPHANUMEXT, 'Sub section type code', VALUE_REQUIRED)
+            'request' => new \external_single_structure([
+                'parentsectionid' => new \external_value(PARAM_INT, 'Parent section id', VALUE_REQUIRED),
+                'srcsectionid' => new \external_value(PARAM_INT, 'Soruce section id', VALUE_REQUIRED),
+                'targetsectionid' => new \external_value(PARAM_INT, 'Target section id', VALUE_OPTIONAL)
+            ])
         ];
         return new \external_function_parameters($parameters);
     }
@@ -54,9 +57,7 @@ class add_subtopic extends \external_api {
      */
     public static function service_returns() {
         $keys = [
-            'success' => new \external_value(PARAM_BOOL, 'Was the sub-section successfully added', VALUE_REQUIRED),
-            'subsectionid' => new \external_value(PARAM_INT, 'Id of newly created subsection', VALUE_REQUIRED),
-            'html' => new \external_value(PARAM_RAW, 'HTML of newly created subsection', VALUE_REQUIRED)
+            'success' => new \external_value(PARAM_BOOL, 'Was the sub-section successfully added', VALUE_REQUIRED)
         ];
 
         return new \external_single_structure($keys, 'subsectionresult');
@@ -68,21 +69,20 @@ class add_subtopic extends \external_api {
      * @return \format_visualsections\service\stdClass
      * @throws \invalid_parameter_exception
      */
-    public static function service(int $parentsectionid, string $subsectiontype) {
+    public static function service($request) {
         global $DB;
 
         $service = section::instance();
+        $args = (object) self::validate_parameters(self::service_parameters(), ['request' => $request])['request'];
 
-        $params = ['parentsectionid' => $parentsectionid, 'subsectiontype' => $subsectiontype];
-        $params = self::validate_parameters(self::service_parameters(), $params);
-
-        $parentsection = $DB->get_record('course_sections', ['id' => $params['parentsectionid']]);
+        $parentsection = $DB->get_record('course_sections', ['id' => $args->parentsectionid]);
         if (!$parentsection) {
-            throw new \coding_exception('Invalid parent section id '.$params['parentsectionid']);
+            throw new \coding_exception('Invalid parent section id '.$args->parentsectionid);
         }
 
-        require_capability('moodle/course:update', \context_course::instance($parentsection->course));
+        require_capability('moodle/course:movesections', \context_course::instance($parentsection->course));
 
-        return $service->upsert_subsection($params['parentsectionid'], $params['subsectiontype']);
+        $success = $service->subtopic_move($args->parentsectionid, $args->srcsectionid, $args->targetsectionid ?? null);
+        return ['success' => $success];
     }
 }

@@ -1,13 +1,14 @@
 define(['jquery'], function($) {
     return {
-        applySegments: function() {
+        applySegments: function(courseId) {
             $(function() {
 
-                $('.sectionCircle').each(function() {
-                    var subtopics = $(this).data('subtopicsjson');
-                    var progress = $(this).data('progress');
+                $('.section-circle svg').each(function() {
+                    const subtopics = $(this).data('subtopicsjson');
+                    const progress = $(this).data('progress');
+                    const strokeColor = $(this).data('stroke');
                     setProgress(this, progress);
-                    createSegments(this, subtopics);
+                    createSegments(this, subtopics, strokeColor);
                 });
 
                 function setProgress(sectionCircle, perc) {
@@ -52,7 +53,15 @@ define(['jquery'], function($) {
                     ].join(" ") + " Z";
                 }
 
-                function createSegments(sectionCircle, segments) {
+                function imageHtml(x, y, rectSize, typeCode, link) {
+                    let output = `<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#${typeCode})" />`;
+                    if (link) {
+                        output = `<a href="${link}">${output}</a>`;
+                    }
+                    return output;
+                }
+
+                function createSegments(sectionCircle, segments, strokeColor) {
                     let percMult = 100 / segments.length;
                     let r = $(sectionCircle).find('> circle').attr('r');
                     let rectSize = r;
@@ -68,9 +77,10 @@ define(['jquery'], function($) {
                             let endAngle = (Math.PI * 2) / (100 / perc);
                             $("<path />")
                                 .attr("d", createSvgArc(0, 0, r, startAngle, endAngle * 2))
+                                .attr("stroke", strokeColor)
+                                .attr("stroke-width", "6")
                                 .attr("fill", "none")
-                                .attr("stroke", "red")
-                                .attr("stroke-width", "4")
+                                //.attr("fill-opacity", "0.4")
                                 .appendTo($(arcsEl));
                             $(arcsEl).html($(arcsEl).html());
                             startAngle += endAngle;
@@ -113,16 +123,18 @@ define(['jquery'], function($) {
                                 }
                             }
                             const typeCode = segments[s].typecode;
+                            const link = segments[s].link ? segments[s].link : null;
 
-                            $(`<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#${typeCode})" />`)
+                            $(imageHtml(x, y, rectSize, typeCode, link))
                                 .appendTo($(arcsEl));
                             $(arcsEl).html($(arcsEl).html());
                         }
-                    } else {
+                    } else if (segments.length === 1) {
                         const typeCode = segments[0].typecode;
                         var x = -rectSize/2;
                         var y = -rectSize/2;
-                        $(`<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#${typeCode})" />`)
+                        const link = segments[0].link ? segments[0].link : null;
+                        $(imageHtml(x, y, rectSize, typeCode, link))
                             .appendTo($(arcsEl));
                         $(arcsEl).html($(arcsEl).html());
                     }

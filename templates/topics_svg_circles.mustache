@@ -13,33 +13,51 @@
 
 <div class="container">
     <div class="carousel slide" id="section-carousel">
-        <div class="carousel-inner row w-75 mx-auto">
+        <div class="carousel-inner row mx-auto">
             {{#topicgroups}}
                 <div class="carousel-item {{cssclass}}">
                     <div>
                     {{#topics}}
-                        <svg class="sectionCircle" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}">
-                            <circle cx="400" cy="400" r="360" fill="none" stroke="{{strokecolor}}" stroke-width="4"/>
+                        <span class="section-circle {{#locked}}locked{{/locked}}">
+                            <h3 class="sectiontitle">
+                                <span class="badge {{#locked}}badge-secondary{{/locked}}{{^locked}}badge-primary{{/locked}} mr-2">{{number}}</span>
+                                {{name}}
+                            </h3>
+                        {{#link}}
+                            <a href="{{{link}}}">
+                        {{/link}}
+                        {{#locked}}
+                            <i class="fa fa-lock"></i>
+                        {{/locked}}
+                        <svg {{#tooltip}}data-toggle="tooltip" data-placement="bottom" title="{{.}}"{{/tooltip}} viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}" data-stroke="{{strokecolor}}">
+                            <circle cx="400" cy="400" r="360" fill="none" stroke="{{strokecolor}}" stroke-width="6"/>
                             <circle class="progress" transform=" translate(400 400) rotate(-90) scale(1 -1)" cx="0" cy="0" r="370" fill="none" stroke="{{strokecolor}}" stroke-width="20"/>
                             <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
                             </g>
                         </svg>
+                        {{#link}}
+                            </a>
+                        {{/link}}
+                        </span>
                     {{/topics}}
                     </div>
                 </div>
             {{/topicgroups}}
         </div>
         <a class="carousel-control-prev" href="#section-carousel" role="button" data-slide="prev">
-            <i class="fa fa-chevron-left"></i>
+            {{# pix }} nav-left, format_visualsections {{/ pix }}
             <span class="sr-only">Previous</span>{{!TODO}}
         </a>
         <a class="carousel-control-next" href="#section-carousel" role="button" data-slide="next">
-            <i class="fa fa-chevron-right"></i>
+            {{# pix }} nav-right, format_visualsections {{/ pix }}
             <span class="sr-only">Next</span>{{!TODO}}
         </a>
         <ol class="carousel-indicators carousel-indicators-relative">
             {{#topicgroups}}
-                <li data-target="#carouselExampleIndicators" data-slide-to="{{index}}" class="{{cssclass}}"></li>
+                <li data-target="#section-carousel" data-slide-to="{{index}}" class="{{cssclass}}">
+                    {{# pix }} circle, format_visualsections {{/ pix }}
+                    {{# pix }} circle-filled, format_visualsections {{/ pix }}
+                </li>
             {{/topicgroups}}
         </ol>
     </div>

@@ -31,6 +31,7 @@ use format_visualsections\model\imageurl;
 use format_visualsections\model\topics_svg_circles;
 use format_visualsections\model\topic;
 use format_visualsections\model\subsection;
+use format_visualsections\model\sectionsubsection;
 
 require_once($CFG->dirroot.'/course/format/renderer.php');
 
@@ -64,12 +65,13 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     /**
-     * Initialise code to manage subsections.
+     * Initialise code to navigate / manage subsections.
      * @throws dml_exception
      */
-    protected function init_subsection_types() {
+    protected function init_section_js(string $defaultsection) {
         global $PAGE, $COURSE;
-        $PAGE->requires->js_call_amd('format_visualsections/subsections', 'init', [$COURSE->id]);
+        $capcourseupdate = has_capability('moodle/course:update', context_course::instance($COURSE->id));
+        $PAGE->requires->js_call_amd('format_visualsections/subsections', 'init', [$COURSE->id, $capcourseupdate, $defaultsection]);
     }
 
     /**
@@ -104,7 +106,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $countcomplete = 0;
         if (!empty($mods)) {
             foreach ($mods as $mod) {
-                $activitycompletiondata = $completion->get_data($mod, false, $USER->id);
+                $activitycompletiondata = $completion->get_data($mod, true);
                 $complete = $activitycompletiondata->completionstate === COMPLETION_COMPLETE;
                 $countcomplete += $complete ? 1 : 0;
             }
@@ -126,10 +128,15 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     protected function start_section_list() {
-        global $PAGE, $COURSE;
+        global $PAGE, $COURSE, $CFG;
 
-        $PAGE->requires->js_call_amd('format_visualsections/sectioncircle', 'applySegments');
-        $this->init_subsection_types();
+        static $sectioncirclesoutput = false; // Only output circle nav once.
+
+        if ($sectioncirclesoutput) {
+            return html_writer::start_tag('ul', array('class' => 'visualsections'));
+        }
+
+        $PAGE->requires->js_call_amd('format_visualsections/sectioncircle', 'applySegments', [$COURSE->id]);
 
         $data = get_config('format_visualsections', 'subsectiontypes');
         $typesarr = $this->sectionservice->config_to_types_array($data);
@@ -148,7 +155,9 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $topics = [];
         $firstsection = null;
         $prevsectioncomplete = false;
+        $lastunlockedsection = null;
         $prevsection = null;
+        $capcourseupdate = has_capability('moodle/course:update', context_course::instance($COURSE->id));
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -173,7 +182,18 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $subtopics = [];
             $ss = 0;
             foreach ($subsections as $subsection) {
-                $subtopics[] = new subsection($section->id, $subsection->typecode, $subsection->name, $subsection->id);
+                $link = null;
+                if ($capcourseupdate) {
+                    $link = $CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'#subsection'.$subsection->id;
+                }
+                $subtopics[] = new subsection(
+                    $section->id,
+                    $subsection->typecode,
+                    $subsection->size ?? 's',
+                    $subsection->name,
+                    $subsection->id,
+                    $link
+                );
                 $ss ++;
                 if ($ss >= 5) {
                     // Max five subtopics.
@@ -181,13 +201,39 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 }
             }
             $cssclass = $isfirstsection ? 'active' : '';
-            $strokecolor = $isfirstsection || ($section->available && $prevsectioncomplete) ? '#f00' : '#eee';
-            $topics[] = new topic($progress, json_encode($subtopics), $cssclass, $strokecolor);
+            $isunlockedsection = $isfirstsection || ($section->available && $prevsectioncomplete);
+            $lastunlockedsection = $isunlockedsection ? $section->section : $lastunlockedsection;
+            $strokecolor = $isunlockedsection ? '#f00' : '#eee';
+
+            $link = null;
+            $tooltip = null;
+            if ($isunlockedsection) {
+                $link = new moodle_url('/course/view.php', ['id' => $COURSE->id], 'section-'.$section->section);
+            } else {
+                // TODO localise.
+                $tooltip = get_string('sectionlocked', 'format_visualsections');
+            }
+            $title = get_section_name($COURSE, $section);
+            $topics[] = new topic($section->id, $title, $section->section, $progress, json_encode($subtopics), $cssclass, $strokecolor, $link, $tooltip, !$isunlockedsection);
             $prevsection = $section;
         }
+
+        $this->init_section_js('section-'.$lastunlockedsection);
+
         $topicgroups = array_chunk($topics, 3); // Three topics per group.
+
+
+        $activeidx = 0;
+        foreach ($topicgroups as $idx => $topics) {
+            foreach ($topics as $topic) {
+                if ($topic->number === $lastunlockedsection) {
+                    $activeidx = $idx;
+                }
+            }
+        }
+
         foreach ($topicgroups as $idx => $group) {
-            $cssclass = $idx === 0 ? 'active' : '';
+            $cssclass = $activeidx === $idx ? 'active' : '';
             $topicgroups[$idx] = (object) [
                 'topics' => $group,
                 'cssclass' => $cssclass,
@@ -198,8 +244,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
         $visualsections = $this->render_from_template('format_visualsections/topics_svg_circles', $data);
 
+        $sectioncirclesoutput = true; // Only output circle nav once.
 
-        return $visualsections.html_writer::start_tag('ul', array('class' => 'visualsections'));
+        $classcanupdate = $capcourseupdate ? 'capcourseupdate' : '';
+        return $visualsections.html_writer::start_tag('ul', array('class' => 'visualsections '.$classcanupdate));
     }
 
     /**
@@ -307,26 +355,6 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     /**
-     * Display section and all its activities and subsections (called recursively)
-     *
-     * @param int|stdClass $course
-     * @param int|section_info $section
-     * @param int $sr section to return to (for building links)
-     * @param int $level nested level on the page (in case of 0 also displays additional start/end html code)
-     */
-    public function display_section($course, $section, $sr, $level = 0) {
-        global $PAGE;
-
-        $section = <<<SECTION
-        <section>
-        TEST
-        </section>
-SECTION;
-
-        echo $section;
-    }
-
-    /**
      * Renders subsections for a specific sectionid.
      * Note - we only have one level of subsections - nested not allowed.
      * @param int $sectionid
@@ -341,6 +369,88 @@ SECTION;
         ];
         $subsections = $this->render_from_template('format_visualsections/add_subsections', $context);
         return $subsections;
+    }
+
+    /**
+     * Generate the display of the header part of a section before
+     * course modules are included
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @param stdClass $course The course entry from DB
+     * @param bool $onsectionpage true if being printed on a single-section page
+     * @param int $sectionreturn The section to return to after an action
+     * @return string HTML to output.
+     */
+    protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
+        global $PAGE;
+
+        $o = '';
+        $currenttext = '';
+        $sectionstyle = '';
+
+        if ($section->section != 0) {
+            // Only in the non-general sections.
+            if (!$section->visible) {
+                $sectionstyle = ' hidden';
+            }
+            if (course_get_format($course)->is_section_current($section)) {
+                $sectionstyle = ' current';
+            }
+        }
+
+        $o.= html_writer::start_tag('li', array('id' => 'section-'.$section->section,
+            'data-section-id' => $section->id,
+            'class' => 'section main clearfix'.$sectionstyle, 'role'=>'region',
+            'aria-label'=> get_section_name($course, $section)));
+
+        // Create a span that contains the section title to be used to create the keyboard section move menu.
+        $o .= html_writer::tag('span', get_section_name($course, $section), array('class' => 'hidden sectionname'));
+
+        $leftcontent = $this->section_left_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $leftcontent, array('class' => 'left side'));
+
+        $rightcontent = $this->section_right_content($section, $course, $onsectionpage);
+        $o.= html_writer::tag('div', $rightcontent, array('class' => 'right side'));
+        $o.= html_writer::start_tag('div', array('class' => 'content'));
+
+        // When not on a section page, we display the section titles except the general section if null
+        $hasnamenotsecpg = (!$onsectionpage && ($section->section != 0 || !is_null($section->name)));
+
+        // When on a section page, we only display the general section title, if title is not the default one
+        $hasnamesecpg = ($onsectionpage && ($section->section == 0 && !is_null($section->name)));
+
+        $classes = ' accesshide';
+        if ($hasnamenotsecpg || $hasnamesecpg) {
+            $classes = '';
+        }
+        $sectionname = html_writer::tag('span', $this->section_title($section, $course));
+        $o.= $this->output->heading($sectionname, 3, 'sectionname' . $classes);
+
+        $o .= $this->section_availability($section);
+
+        $o .= html_writer::start_tag('div', array('class' => 'summary'));
+        if ($section->uservisible || $section->visible) {
+            // Show summary if section is available or has availability restriction information.
+            // Do not show summary if section is hidden but we still display it because of course setting
+            // "Hidden sections are shown in collapsed form".
+            $o .= $this->format_summary_text($section);
+        }
+        $o .= html_writer::end_tag('div');
+
+        return $o;
+    }
+
+    /**
+     * Multiple section page only!
+     * @param stdClass $course
+     * @param array $sections
+     * @param array $mods
+     * @param array $modnames
+     * @param array $modnamesused
+     * @param int $displaysection
+     */
+    public function print_single_section_page($course, $sections, $mods, $modnames, $modnamesused, $displaysection) {
+        return $this->print_multiple_section_page($course, $sections, $mods, $modnames, $modnamesused);
     }
 
     /**
@@ -378,7 +488,9 @@ SECTION;
 
         $sectionhierarchy = $format->get_section_hierarchy();
         $sections = $modinfo->get_section_info_all();
+        $s = 0;
         foreach ($sections as $thissection) {
+            $s ++;
             if (!empty($sectionparentids[$thissection->id]->parentid)) {
                 // Skip sub sections.
                 continue;
@@ -401,11 +513,13 @@ SECTION;
                         foreach ($subsections as $subsection) {
                             $scount ++;
 
+                            $subsectioninfo = $modinfo->get_section_info($subsection->section);
+
                             $subsectiontitle = !empty($subsection->name) ? $subsection->name : $sectiontitle . '.' . $scount;
 
                             $headingid = $subsectionsid.'heading'.$subsection->id;
-                            $subsectionid = 'subsection'.$subsection->id;
-                            $collapseid = 'section-'.$subsection->section;
+                            $subsectionid = $subsection->id;
+                            $collapseid = 'div-section-'.$subsection->section;
                             $subsectionclass = 'typeclass-'.$subsection->typecode;
                             $cardbody = $this->courserenderer->course_section_cm_list($course, $subsection->section, null);
                             $cardbody .= $this->courserenderer->course_section_add_cm_control($course, $subsection->section, null);
@@ -413,24 +527,42 @@ SECTION;
                             $type = $subsectiontypes[$typecode];
                             $imageurl = $type->image;
 
-                            // TODO - template.
-                            $subsectionhtml = <<<HTML
-  <div id ="$subsectionid" class="card subsection $subsectionclass">
-    <div class="card-header" id="$headingid">
-      <h2 class="mb-0">
-        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#$collapseid" aria-expanded="true" aria-controls="$collapseid">
-          <img src="$imageurl" class="subsection-icon"/>$subsectiontitle
-        </button>
-      </h2>
-    </div>
+                            $sectionheader = $this->section_header($subsectioninfo, $course, false, 0);
+                            $sectionfooter = $this->section_footer();
+                            $cardbody = $sectionheader.$cardbody.$sectionfooter; // This is here purely to satisfy SECTIONLI in actions.js
 
-    <div id="$collapseid" class="section collapse" aria-labelledby="$headingid" data-parent="#$subsectionsid">
-      <div class="card-body">
-        $cardbody
-      </div>
-    </div>
-  </div>
-HTML;
+                            $allowmoveup = $thissection->section > 1 || $scount > 1;
+                            $allowmovedown = $thissection->section < $numsections || $scount < count($subsections);
+
+                            $deleteurl = new moodle_url('/course/editsection.php',
+                                    [
+                                        'id' => $subsection->id,
+                                        'sr' => '',
+                                        'delete' => 1,
+                                        'sesskey' => sesskey()
+                                    ]
+                                ).'';
+
+                            $sectionsubsection = new sectionsubsection(
+                                $subsectionid,
+                                $subsectionsid,
+                                $subsectionclass,
+                                $headingid,
+                                $collapseid,
+                                $imageurl,
+                                $subsectiontitle,
+                                $cardbody,
+                                $allowmoveup,
+                                $allowmovedown,
+                                $deleteurl,
+                                $PAGE->user_is_editing()
+                            );
+                            if (count($subsections) === 1 ) {
+                                if (!has_capability('moodle/course:update', $context)) {
+                                    $sectionsubsection->show = true;
+                                }
+                            }
+                            $subsectionhtml = $this->render_from_template('format_visualsections/sectionsubsection', $sectionsubsection);
 
                             echo $subsectionhtml;
                         }
@@ -442,74 +574,6 @@ HTML;
                 echo $this->section_footer();
             }
         }
-
-        /*foreach ($modinfo->get_section_info_all() as $section => $thissection) {
-            if (empty($sectionswithparents[$thissection->id])) {
-                continue;
-            }
-            $fullinfo = $sectionswithparents[$thissection->id];
-            if ($fullinfo->parentid) {
-                continue;
-            }
-            if ($section == 0) {
-                // 0-section is displayed a little different then the others
-                if ($thissection->summary or !empty($modinfo->sections[0]) or $PAGE->user_is_editing()) {
-                    echo $this->section_header($thissection, $course, false, 0);
-                    echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                    echo $this->courserenderer->course_section_add_cm_control($course, 0, 0);
-                    echo $this->section_footer();
-                }
-                continue;
-            }
-            if ($section > $numsections) {
-                // activities inside this section are 'orphaned', this section will be printed as 'stealth' below
-                continue;
-            }
-            // Show the section if the user is permitted to access it, OR if it's not available
-            // but there is some available info text which explains the reason & should display,
-            // OR it is hidden but the course has a setting to display hidden sections as unavilable.
-            $showsection = $thissection->uservisible ||
-                ($thissection->visible && !$thissection->available && !empty($thissection->availableinfo)) ||
-                (!$thissection->visible && !$course->hiddensections);
-            if (!$showsection) {
-                continue;
-            }
-
-            if (!$PAGE->user_is_editing() && $course->coursedisplay == COURSE_DISPLAY_MULTIPAGE) {
-                // Display section summary only.
-                echo $this->section_summary($thissection, $course, null);
-            } else {
-                echo $this->section_header($thissection, $course, false, 0);
-                if ($thissection->uservisible) {
-                    // For now section_add_menus is just here to satisfy JS for moving sections.
-                    echo '<div class="section_add_menus"></div>';
-
-                    echo $this->render_subsections($thissection->id);
-                    //echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                    //echo $this->courserenderer->course_section_add_cm_control($course, $section, 0);
-                }
-                echo $this->section_footer();
-            }
-        }
-
-        if ($PAGE->user_is_editing() and has_capability('moodle/course:update', $context)) {
-            // Print stealth sections if present.
-            foreach ($modinfo->get_section_info_all() as $section => $thissection) {
-                if ($section <= $numsections or empty($modinfo->sections[$section])) {
-                    // this is not stealth section or it is empty
-                    continue;
-                }
-                echo $this->stealth_section_header($section);
-                echo $this->courserenderer->course_section_cm_list($course, $thissection, 0);
-                echo $this->stealth_section_footer();
-            }
-
-            echo $this->end_section_list();
-
-            echo $this->change_number_sections($course, 0);
-        } else {
-            echo $this->end_section_list();
-        }*/
 
     }
 }

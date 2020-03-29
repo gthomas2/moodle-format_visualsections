@@ -53,9 +53,12 @@ class section extends base_service {
                 'id' => $subsectionid,
                 'parentid' => $data->parentid,
                 'typecode' => $data->typecode,
-                'name' => $data->name
+                'name' => $data->name,
+                'size' => $data->size
             ];
-            $success = $format->update_section_format_options($formatoptions);
+            // Note, we can't test for success here because it will return false simply
+            // if the values are the same.
+            $format->update_section_format_options($formatoptions);
         }
         return (object) [
             'success' => $success,
@@ -127,5 +130,38 @@ class section extends base_service {
             $i++;
         }
         return $types;
+    }
+
+    public function subtopic_move(int $parentsectionid, int $srcsectionid, ?int $targetsectionid): bool {
+        global $DB;
+
+        $parentsection = $DB->get_record('course_sections', ['id' => $parentsectionid]);
+        if (!$parentsection) {
+            throw new \coding_exception('Invalid parent section id '.$parentsectionid);
+        }
+
+        $srcsection = $DB->get_record('course_sections', ['id' => $srcsectionid]);
+        if (!$srcsection) {
+            throw new \coding_exception('Invalid src section id '.$srcsectionid);
+        }
+
+        $format = \format_visualsections::instance($parentsection->course);
+        $formatoptions = $format->get_format_options($srcsection);
+        $formatoptions['parentid'] = $parentsectionid;
+        $formatoptions['id'] = $srcsectionid;
+
+
+        // Note, we can't test for success here because it will return false simply
+        // if the values are the same.
+        $format->update_section_format_options($formatoptions);
+
+        if (empty($targetsectionid)) {
+            $targetsectionid = $parentsectionid;
+        }
+        $targetsection = $DB->get_record('course_sections', ['id' => $targetsectionid]);
+
+        $course = get_course($parentsection->course);
+
+        return move_section_to($course, $srcsection->section, $targetsection->section);
     }
 }

@@ -9,6 +9,21 @@ class topic extends base_model {
     /**
      * @var int
      */
+    public $id;
+
+    /**
+     * @var string
+     */
+    public $name;
+
+    /**
+     * @var int
+     */
+    public $number;
+
+    /**
+     * @var int
+     */
     public $progress;
 
     /**
@@ -27,12 +42,37 @@ class topic extends base_model {
     public $strokecolor;
 
     /**
+     * @var string
+     */
+    public $link;
+
+    /**
+     * @var string
+     */
+    public $tooltip;
+
+    /**
+     * @var bool
+     */
+    public $locked;
+
+    /**
      * Topic constructor.
      * @param int $progress
      * @param string $subtopicsjson - json data
      * @param string $cssclass
      */
-    public function __construct(int $progress, string $subtopicsjson, string $cssclass, string $strokecolor) {
+    public function __construct(
+                                int     $id,
+                                string  $name,
+                                int     $number,
+                                int     $progress,
+                                string  $subtopicsjson,
+                                string  $cssclass,
+                                string  $strokecolor,
+                                ?string $link = null,
+                                ?string $tooltip = null,
+                                ?bool   $locked = false) {
         $this->set_props_construct_args(func_get_args());
     }
 

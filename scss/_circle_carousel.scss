@@ -2,9 +2,9 @@ body.format-visualsections {
 
     .carousel-control-prev, .carousel-control-next {
         width: 12.5%;
-        i {
-            color: grey;
-            font-size: 4em;
+        img {
+            width: 2em;
+            height: 2em;
         }
     }
 
@@ -12,8 +12,23 @@ body.format-visualsections {
         position: relative;
         margin-top: 2em;
         li {
-            background-color: grey;
+            width: 1em;
+            height: 1em;
+            text-indent: 0;
+            background-color: none;
+            &:not(.active) > img:last-of-type {
+                display: none;
+            }
+            &.active > img:first-of-type{
+                display: none;
+            }
         }
+
+    }
+
+    .carousel-inner {
+        padding-left: 15%;
+        padding-right: 15%;
     }
 
 }

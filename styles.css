@@ -16,15 +16,32 @@
 
 body.format-visualsections .carousel-control-prev, body.format-visualsections .carousel-control-next {
   width: 12.5%; }
-  body.format-visualsections .carousel-control-prev i, body.format-visualsections .carousel-control-next i {
-    color: grey;
-    font-size: 4em; }
+  body.format-visualsections .carousel-control-prev img, body.format-visualsections .carousel-control-next img {
+    width: 2em;
+    height: 2em; }
 
 body.format-visualsections .carousel-indicators.carousel-indicators-relative {
   position: relative;
   margin-top: 2em; }
   body.format-visualsections .carousel-indicators.carousel-indicators-relative li {
-    background-color: grey; }
+    width: 1em;
+    height: 1em;
+    text-indent: 0;
+    background-color: none; }
+    body.format-visualsections .carousel-indicators.carousel-indicators-relative li:not(.active) > img:last-of-type {
+      display: none; }
+    body.format-visualsections .carousel-indicators.carousel-indicators-relative li.active > img:first-of-type {
+      display: none; }
+
+body.format-visualsections .carousel-inner {
+  padding-left: 15%;
+  padding-right: 15%; }
+
+body.format-visualsections#page-course-editsection #fitem_id_parentid, body.format-visualsections#page-course-editsection #fitem_id_typecode, body.format-visualsections#page-course-editsection #fitem_id_size {
+  display: none; }
+
+body.format-visualsections:not(.editing) .subsection li.section > div.content h3.sectionname {
+  display: none; }
 
 body.format-visualsections .course-content ul.visualsections {
   margin: 0;
@@ -54,24 +71,56 @@ body.format-visualsections .course-content ul.visualsections li.section .section
 body.format-visualsections .course-content ul.visualsections li.section .section_action_menu .menu-action-text {
   white-space: nowrap; }
 
+body.format-visualsections ul.visualsections > li.section {
+  display: none; }
+  body.format-visualsections ul.visualsections > li.section.active {
+    display: block; }
+
+body.format-visualsections ul.visualsections.capcourseupdate li.section {
+  display: block; }
+
 body.format-visualsections .subsection-icon {
   max-width: 2em;
   height: auto;
   margin-right: 1em; }
 
-body.format-visualsections #page-course-editsection #fitem_id_parentid, body.format-visualsections #page-course-editsection #fitem_id_typecode {
-  display: none; }
-
 body.format-visualsections li.section {
   margin-bottom: 2em; }
 
-.sectionCircle {
-  width: 32%;
-  min-width: 150px; }
+body.format-visualsections h3.sectiontitle {
+  font-size: 1rem; }
 
-.subsectiontyperow {
+body.format-visualsections .subsectiontyperow {
   margin-bottom: 0.25em;
   list-style: none; }
 
-.subsectiontypes ul {
+body.format-visualsections .subsectiontypes ul {
   padding-left: 0; }
+
+body.format-visualsections .subsection.yui3-dd-drop-active-invalid .section.collapse {
+  display: block; }
+
+body.format-visualsections .section-circle {
+  width: 32%;
+  min-width: 150px;
+  display: inline-block;
+  position: relative; }
+  body.format-visualsections .section-circle.locked i.fa-lock {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    font-size: 2em;
+    color: #ccc; }
+
+body.format-visualsections .card-header h2 button {
+  width: 100%;
+  text-align: left; }
+
+body.format-visualsections ul li.section:last-of-type .subsection:last-of-type .move-down {
+  display: none; }
+
+body.format-visualsections ul li.section:nth-of-type(2) .subsection:first-of-type .move-up {
+  display: none; }
+
+body.format-visualsections .subsection .section .card-body > ul {
+  list-style: none; }
