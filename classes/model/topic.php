@@ -52,9 +52,24 @@ class topic extends base_model {
     public $tooltip;
 
     /**
+     * @var string
+     */
+    public $arialabel;
+
+    /**
      * @var bool
      */
     public $locked;
+
+    /**
+     * @var bool
+     */
+    public $nextlocked;
+
+    /**
+     * @var bool
+     */
+    public $lastitem;
 
     /**
      * Topic constructor.
@@ -72,7 +87,11 @@ class topic extends base_model {
                                 string  $strokecolor,
                                 ?string $link = null,
                                 ?string $tooltip = null,
-                                ?bool   $locked = false) {
+                                ?string $arialabel = null,
+                                ?bool   $locked = false,
+                                ?bool   $nextlocked = false,
+                                ?bool   $lastitem = false
+) {
         $this->set_props_construct_args(func_get_args());
     }
 

@@ -38,7 +38,7 @@ require_once($CFG->dirroot.'/course/format/renderer.php');
 /**
  * Basic renderer for visualsections format.
  *
- * @copyright 2012 Dan Poltawski
+ * @copyright 2020 Citricity Ltd www.citri.city
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class format_visualsections_renderer extends format_section_renderer_base {
@@ -68,10 +68,11 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * Initialise code to navigate / manage subsections.
      * @throws dml_exception
      */
-    protected function init_section_js(string $defaultsection) {
-        global $PAGE, $COURSE;
-        $capcourseupdate = has_capability('moodle/course:update', context_course::instance($COURSE->id));
-        $PAGE->requires->js_call_amd('format_visualsections/subsections', 'init', [$COURSE->id, $capcourseupdate, $defaultsection]);
+    protected function init_section_js(string $defaultsection, int $courseid) {
+        global $PAGE;
+        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
+        $PAGE->requires->js_call_amd('format_visualsections/subsections', 'init',
+            [$courseid, $capviewallgrades, $defaultsection]);
     }
 
     /**
@@ -100,14 +101,14 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     protected function section_completion_progress($parentsection) {
-        global $COURSE, $USER;
+        global $COURSE;
         $mods = $this->get_section_mods($parentsection);
         $completion = new completion_info($COURSE);
         $countcomplete = 0;
         if (!empty($mods)) {
             foreach ($mods as $mod) {
                 $activitycompletiondata = $completion->get_data($mod, true);
-                $complete = $activitycompletiondata->completionstate === COMPLETION_COMPLETE;
+                $complete = (int) $activitycompletiondata->completionstate === COMPLETION_COMPLETE;
                 $countcomplete += $complete ? 1 : 0;
             }
         } else {
@@ -124,19 +125,103 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     /**
-     * Generate the starting container html for a list of sections
-     * @return string HTML to output.
+     * Get the next section after $sectionnum
+     * @param int $courseid
+     * @param int $sectionnum
+     * @return null|object
+     * @throws moodle_exception
      */
-    protected function start_section_list() {
-        global $PAGE, $COURSE, $CFG;
+    private function next_section(int $courseid, int $sectionnum): ?object {
+        $modinfo = get_fast_modinfo($courseid);
+        $sections = $modinfo->get_section_info_all();
+        $format = course_get_format($courseid);
+        $sectionhierarchy = $format->get_section_hierarchy();
+        $foundsection = null;
 
-        static $sectioncirclesoutput = false; // Only output circle nav once.
+        foreach ($sections as $section) {
+            if ($section->section === 0) {
+                continue;
+            }
+            if (!$section->uservisible) {
+                continue;
+            }
+            if (!empty($sectionhierarchy[$section->parentid])) {
+                // Skip sub sections.
+                continue;
+            }
 
-        if ($sectioncirclesoutput) {
-            return html_writer::start_tag('ul', array('class' => 'visualsections'));
+            if ($foundsection) {
+                return $section; // This should be the section following $sectionnum;
+            }
+
+            if ($section->section === $sectionnum) {
+                $foundsection = $section;
+            }
         }
 
-        $PAGE->requires->js_call_amd('format_visualsections/sectioncircle', 'applySegments', [$COURSE->id]);
+        return null;
+    }
+
+    private function section_info(int $courseid, int $sectionnum) {
+        $modinfo = get_fast_modinfo($courseid);
+        $sections = $modinfo->get_section_info_all();
+        $format = course_get_format($courseid);
+        $sectionhierarchy = $format->get_section_hierarchy();
+        $prevsection = null;
+        $unlocked = false;
+        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
+
+        foreach ($sections as $section) {
+            if ($section->section === 0) {
+                continue;
+            }
+            if (!$section->uservisible) {
+                continue;
+            }
+            if (!empty($sectionhierarchy[$section->parentid])) {
+                // Skip sub sections.
+                continue;
+            }
+
+            $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
+
+            if ($section->section === $sectionnum) {
+                if ($capviewallgrades || $prevsectioncomplete) {
+                    $unlocked = true;
+                }
+                break; // Break regardless of whether unlocked or not - we have our section.
+            }
+            $prevsection = $section;
+        }
+        return (object) ['prevsection' => $prevsection, 'unlocked' => $unlocked];
+    }
+
+    /**
+     * Is a specific section (by section number) unlocked?
+     * @param int $courseid
+     * @param int $section - section number
+     * @return bool
+     * @throws moodle_exception
+     */
+    private function section_unlocked(int $courseid, int $section) {
+        $info = $this->section_info($courseid, $section);
+        return $info->unlocked;
+    }
+
+    /**
+     * Get the previous section for a section (by section number).
+     * @param int $courseid
+     * @param int $section - section number
+     * @return bool
+     * @throws moodle_exception
+     */
+    private function previous_section(int $courseid, int $section) {
+        $info = $this->section_info($courseid, $section);
+        return $info->prevsection;
+    }
+
+    public function render_carousel(int $courseid, ?bool $initjs = false) {
+        global $PAGE, $CFG;
 
         $data = get_config('format_visualsections', 'subsectiontypes');
         $typesarr = $this->sectionservice->config_to_types_array($data);
@@ -146,10 +231,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $imageurls[] = new imageurl($type->code, $type->image);
         }
 
-        $modinfo = get_fast_modinfo($COURSE);
+        $modinfo = get_fast_modinfo($courseid);
         $sections = $modinfo->get_section_info_all();
 
-        $format = course_get_format($COURSE);
+        $format = course_get_format($courseid);
         $sectionhierarchy = $format->get_section_hierarchy();
 
         $topics = [];
@@ -157,7 +242,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $prevsectioncomplete = false;
         $lastunlockedsection = null;
         $prevsection = null;
-        $capcourseupdate = has_capability('moodle/course:update', context_course::instance($COURSE->id));
+        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -183,8 +268,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $ss = 0;
             foreach ($subsections as $subsection) {
                 $link = null;
-                if ($capcourseupdate) {
-                    $link = $CFG->wwwroot.'/course/view.php?id='.$COURSE->id.'#subsection'.$subsection->id;
+                if ($capviewallgrades) {
+                    $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsection'.$subsection->id;
                 }
                 $subtopics[] = new subsection(
                     $section->id,
@@ -201,33 +286,55 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 }
             }
             $cssclass = $isfirstsection ? 'active' : '';
-            $isunlockedsection = $isfirstsection || ($section->available && $prevsectioncomplete);
+            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && $prevsectioncomplete);
             $lastunlockedsection = $isunlockedsection ? $section->section : $lastunlockedsection;
             $strokecolor = $isunlockedsection ? '#f00' : '#eee';
 
             $link = null;
             $tooltip = null;
             if ($isunlockedsection) {
-                $link = new moodle_url('/course/view.php', ['id' => $COURSE->id], 'section-'.$section->section);
+                $link = new moodle_url('/course/view.php', ['id' => $courseid], 'section-'.$section->section);
             } else {
-                // TODO localise.
                 $tooltip = get_string('sectionlocked', 'format_visualsections');
             }
-            $title = get_section_name($COURSE, $section);
-            $topics[] = new topic($section->id, $title, $section->section, $progress, json_encode($subtopics), $cssclass, $strokecolor, $link, $tooltip, !$isunlockedsection);
+            $nextsection = $this->next_section($courseid, $section->section);
+            $nextlocked = false;
+            if ($nextsection) {
+                $nextlocked = !$this->section_unlocked($courseid, $nextsection->section);
+            }
+            $title = get_section_name($courseid, $section);
+            $arialabel = empty($tooltip) ? get_string('navigatetosection', 'format_visualsections', $title) : null;
+            $topics[] = new topic(
+                $section->id,
+                $title,
+                $section->section,
+                $progress,
+                json_encode($subtopics),
+                $cssclass,
+                $strokecolor,
+                $link,
+                $tooltip,
+                $arialabel,
+                !$isunlockedsection,
+                $nextlocked,
+                $lastitem = !$nextsection
+            );
             $prevsection = $section;
         }
 
-        $this->init_section_js('section-'.$lastunlockedsection);
+        if ($initjs) {
+            $this->init_section_js('section-'.$lastunlockedsection, $courseid);
+        }
 
         $topicgroups = array_chunk($topics, 3); // Three topics per group.
 
-
         $activeidx = 0;
-        foreach ($topicgroups as $idx => $topics) {
-            foreach ($topics as $topic) {
-                if ($topic->number === $lastunlockedsection) {
-                    $activeidx = $idx;
+        if (!$capviewallgrades) {
+            foreach ($topicgroups as $idx => $topics) {
+                foreach ($topics as $topic) {
+                    if ($topic->number === $lastunlockedsection) {
+                        $activeidx = $idx;
+                    }
                 }
             }
         }
@@ -242,12 +349,32 @@ class format_visualsections_renderer extends format_section_renderer_base {
         }
         $data = new topics_svg_circles($imageurls, $topicgroups);
 
-        $visualsections = $this->render_from_template('format_visualsections/topics_svg_circles', $data);
+        return $this->render_from_template('format_visualsections/topics_svg_circles', $data);
+    }
 
-        $sectioncirclesoutput = true; // Only output circle nav once.
+    /**
+     * Generate the starting container html for a list of sections
+     * @return string HTML to output.
+     */
+    protected function start_section_list() {
+        global $COURSE;
 
-        $classcanupdate = $capcourseupdate ? 'capcourseupdate' : '';
-        return $visualsections.html_writer::start_tag('ul', array('class' => 'visualsections '.$classcanupdate));
+        static $carouseloutput = false; // Only output circle nav once.
+
+        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($COURSE->id));
+        $extraclass = $capviewallgrades ? ' capcourseupdate' : '';
+
+        if ($carouseloutput) {
+            return html_writer::start_tag('ul', array('class' => 'visualsections'.$extraclass));
+        }
+
+        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($COURSE->id));
+
+        $carouseloutput = true; // Only output circle nav once.
+
+        $classcanupdate = $capviewallgrades ? 'capcourseupdate' : '';
+        $carousel = '<div id="section-carousel-content">'.$this->render_carousel($COURSE->id, true).'</div>';
+        return $carousel.html_writer::start_tag('ul', array('class' => 'visualsections '.$classcanupdate));
     }
 
     /**
@@ -440,6 +567,29 @@ class format_visualsections_renderer extends format_section_renderer_base {
         return $o;
     }
 
+    public function render_format_footer(int $course, ?int $section = null) {
+        $nextunlocked = false;
+        $nextsection = null;
+        $tooltip = null;
+        $prevsection = null;
+        if ($section) {
+            $nextsection = $this->next_section($course, $section);
+            $prevsection = $this->previous_section($course, $section);
+            if ($nextsection) {
+                $nextunlocked = $this->section_unlocked($course, $nextsection->section);
+                $tooltip = $nextunlocked ? null : get_string('nextsectionlocked', 'format_visualsections');
+            }
+        }
+        return $this->render_from_template('format_visualsections/format_footer', [
+            'navprev' => $prevsection != null,
+            'prevsection' => $prevsection ? $prevsection->section : null,
+            'navnext' => $nextunlocked,
+            'nextsection' => $nextsection ? $nextsection->section : null,
+            'tooltip' => $tooltip,
+            'hasnext' => $nextsection != null
+        ]);
+    }
+
     /**
      * Multiple section page only!
      * @param stdClass $course
@@ -558,7 +708,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
                                 $PAGE->user_is_editing()
                             );
                             if (count($subsections) === 1 ) {
-                                if (!has_capability('moodle/course:update', $context)) {
+                                if (!has_capability('moodle/grade:viewall', $context)) {
                                     $sectionsubsection->show = true;
                                 }
                             }
@@ -574,6 +724,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 echo $this->section_footer();
             }
         }
+
+        echo $this->render_format_footer($course->id);
 
     }
 }

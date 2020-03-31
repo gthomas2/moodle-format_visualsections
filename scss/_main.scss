@@ -85,20 +85,6 @@ body.format-visualsections {
         display: block;
     }
 
-    .section-circle {
-        width: 32%;
-        min-width: 150px;
-        display: inline-block;
-        position: relative;
-        &.locked i.fa-lock {
-            position: absolute;
-            top: 0.5em;
-            right: 0.5em;
-            font-size: 2em;
-            color: #ccc;
-        }
-    }
-
     .card-header h2 button {
         width: 100%;
         text-align: left;
@@ -114,6 +100,12 @@ body.format-visualsections {
 
     .subsection .section .card-body > ul {
         list-style: none;
+    }
+
+    #format-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 40px;
     }
 }
 

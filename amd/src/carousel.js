@@ -11,4 +11,4 @@ define (['jquery', 'format_visualsections/utils'], function($, Utils) {
             });
         }
     };
-})
+});

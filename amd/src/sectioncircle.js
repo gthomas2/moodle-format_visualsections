@@ -1,6 +1,6 @@
 define(['jquery'], function($) {
     return {
-        applySegments: function(courseId) {
+        applySegments: function() {
             $(function() {
 
                 $('.section-circle svg').each(function() {

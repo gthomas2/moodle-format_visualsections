@@ -13,18 +13,19 @@
 
 <div class="container">
     <div class="carousel slide" id="section-carousel">
+        <div class="carousel-spinner"></div>
         <div class="carousel-inner row mx-auto">
             {{#topicgroups}}
                 <div class="carousel-item {{cssclass}}">
-                    <div>
+                    <div class="carousel-topics">
                     {{#topics}}
-                        <span class="section-circle {{#locked}}locked{{/locked}}">
+                        <span class="section-circle {{#locked}}locked{{/locked}}" id="section-circle-{{number}}">
                             <h3 class="sectiontitle">
                                 <span class="badge {{#locked}}badge-secondary{{/locked}}{{^locked}}badge-primary{{/locked}} mr-2">{{number}}</span>
                                 {{name}}
                             </h3>
                         {{#link}}
-                            <a href="{{{link}}}">
+                            <a href="{{{link}}}" {{#arialabel}}aria-label="{{.}}"{{/arialabel}}>
                         {{/link}}
                         {{#locked}}
                             <i class="fa fa-lock"></i>
@@ -39,6 +40,11 @@
                             </a>
                         {{/link}}
                         </span>
+
+                        {{! This is purely cosmetic - just a link between the circles }}
+                        {{^lastitem}}
+                            <span class="circle-link {{#nextlocked}}circle-link-locked{{/nextlocked}}{{^nextlocked}}circle-link-unlocked{{/nextlocked}}"></span>
+                        {{/lastitem}}
                     {{/topics}}
                     </div>
                 </div>
@@ -46,11 +52,11 @@
         </div>
         <a class="carousel-control-prev" href="#section-carousel" role="button" data-slide="prev">
             {{# pix }} nav-left, format_visualsections {{/ pix }}
-            <span class="sr-only">Previous</span>{{!TODO}}
+            <span class="sr-only">{{#str}}previoussections, format_visualsections{{/str}}</span>
         </a>
         <a class="carousel-control-next" href="#section-carousel" role="button" data-slide="next">
             {{# pix }} nav-right, format_visualsections {{/ pix }}
-            <span class="sr-only">Next</span>{{!TODO}}
+            <span class="sr-only">{{#str}}nextsections, format_visualsections{{/str}}</span>
         </a>
         <ol class="carousel-indicators carousel-indicators-relative">
             {{#topicgroups}}

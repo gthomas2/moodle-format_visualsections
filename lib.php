@@ -620,6 +620,20 @@ function format_visualsections_output_fragment_filepicker($args) {
     return $OUTPUT->render($fp);
 }
 
+function format_visualsections_output_fragment_carousel(array $args) {
+    global $PAGE;
+    $output = $PAGE->get_renderer('format_visualsections');
+
+    return $output->render_carousel($args['courseid']);
+}
+
+function format_visualsections_output_fragment_footer(array $args) {
+    global $PAGE;
+    $output = $PAGE->get_renderer('format_visualsections');
+
+    return $output->render_format_footer($args['courseid'], $args['section']);
+}
+
 
 /**
  * Server format visual sections pluginfile.

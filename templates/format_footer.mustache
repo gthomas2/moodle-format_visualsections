@@ -1,0 +1,23 @@
+<div id="format-footer">
+    {{#navprev}}
+        <button
+            data-section="{{prevsection}}"
+            class="js-nav btn btn-primary">
+                <i class="fa fa-chevron-left"></i>
+                {{#str}}prevsection, format_visualsections{{/str}}
+        </button>
+    {{/navprev}}
+    {{!This is just here to satisfy flex so next button appears on the right}}
+    {{^navprev}}<span>&nbsp;</span>{{/navprev}}
+
+    {{#hasnext}}
+        <button
+            data-section="{{nextsection}}"
+            {{^navnext}}disabled{{/navnext}}
+            {{#tooltip}}data-toggle="tooltip" data-placement="bottom" title="{{.}}"{{/tooltip}}
+            class="js-nav btn btn-primary">
+                <i class="fa fa-chevron-right"></i>
+                {{#str}}nextsection, format_visualsections{{/str}}
+        </button>
+    {{/hasnext}}
+</div>
