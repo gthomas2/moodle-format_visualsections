@@ -11,9 +11,10 @@ define(
         "core/event",
         "format_visualsections/utils",
         "format_visualsections/sectioncircle",
-        "format_visualsections/carousel"
+        "format_visualsections/carousel",
+        "format_visualsections/dialog"
     ],
-    function($, Y, ModalFactory, ModalEvents, Ajax, Fragment, Templates, Str, Event, Utils, SectionCircle, Carousel) {
+    function($, Y, ModalFactory, ModalEvents, Ajax, Fragment, Templates, Str, Event, Utils, SectionCircle, Carousel, Dialog) {
     var consts = {
         SUBSECTION_FORM_CONT: "subsectionformcontainer",
         CAROUSEL_CONT: "section-carousel-content",
@@ -105,8 +106,13 @@ define(
                 var subSectionCount = section.find(".subsections .subsection").length;
 
                 if (subSectionCount >= 5) {
-                    // TODO
-                    alert ("too many sections");
+                    Str.get_string("toomanysubsections", "format_visualsections")
+                        .then(function(str) {
+                            Dialog.error(
+                                str,
+                                ''
+                            );
+                        });
                     return;
                 }
 
@@ -341,8 +347,13 @@ define(
                 ])[0]
                     .then(function(result) {
                         if (!result.success) {
-                            // TODO - localise.
-                            alert ("Error: failed to move sub section");
+                            Str.get_string("failedtomovesubsection", "format_visualsections")
+                                .then(function(str) {
+                                    Dialog.error(
+                                        str,
+                                        ''
+                                    );
+                                });
                         }
                     });
             });

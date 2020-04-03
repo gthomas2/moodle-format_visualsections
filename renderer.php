@@ -613,7 +613,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @param array $modnamesused (argument not used)
      */
     public function print_multiple_section_page($course, $sections, $mods, $modnames, $modnamesused) {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $format = course_get_format($course);
 
@@ -693,6 +693,13 @@ class format_visualsections_renderer extends format_section_renderer_base {
                                     ]
                                 ).'';
 
+                            $sizeimageurl = null;
+                            $size = $subsection->size ?? 's';
+                            $sizeicon = $OUTPUT->pix_icon('size-'.$size,
+                                get_string('size:'.$size, 'format_visualsections'),
+                                'format_visualsections',
+                                ['class' => 'size-icon']);
+
                             $sectionsubsection = new sectionsubsection(
                                 $subsectionid,
                                 $subsectionsid,
@@ -700,6 +707,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
                                 $headingid,
                                 $collapseid,
                                 $imageurl,
+                                $sizeicon,
                                 $subsectiontitle,
                                 $cardbody,
                                 $allowmoveup,
@@ -712,7 +720,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
                                     $sectionsubsection->show = true;
                                 }
                             }
-                            $subsectionhtml = $this->render_from_template('format_visualsections/sectionsubsection', $sectionsubsection);
+                            $subsectionhtml = $this->render_from_template('format_visualsections/sectionsubsection',
+                                $sectionsubsection);
 
                             echo $subsectionhtml;
                         }

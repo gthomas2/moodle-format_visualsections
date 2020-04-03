@@ -70,7 +70,7 @@ class subtopictype_addimage extends \external_api {
      * @throws \invalid_parameter_exception
      */
     public static function service($request) {
-        // TODO - capability check.
+        require_capability('format/visualsections:setsubsectiontypeimage', \context_system::instance());
         $service = section::instance();
         $request['filename'] = urldecode($request['filename']);
         $args = (object) self::validate_parameters(self::service_parameters(), ['request' => $request])['request'];

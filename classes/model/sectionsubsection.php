@@ -38,6 +38,11 @@ class sectionsubsection extends base_model {
     /**
      * @var string
      */
+    public $sizeicon;
+
+    /**
+     * @var string
+     */
     public $title;
 
     /**
@@ -77,6 +82,7 @@ class sectionsubsection extends base_model {
         string   $headingid,
         string   $collapseid,
         string   $imageurl,
+        string   $sizeicon,
         string   $title,
         string   $cardbody,
         bool     $allowmoveup,

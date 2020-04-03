@@ -62,8 +62,7 @@ class section extends base_service {
         }
         return (object) [
             'success' => $success,
-            'subsectionid' => $subsectionid,
-            'html' => 'TODO'
+            'subsectionid' => $subsectionid
         ];
     }
 

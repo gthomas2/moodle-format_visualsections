@@ -299,6 +299,12 @@ body.format-visualsections .subsection-icon {
   height: auto;
   margin-right: 1em; }
 
+body.format-visualsections img.icon.size-icon {
+  font-size: 1em;
+  width: 2em;
+  height: 2em;
+  margin-left: 2em; }
+
 body.format-visualsections li.section {
   margin-bottom: 2em; }
 

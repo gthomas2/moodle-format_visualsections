@@ -57,6 +57,7 @@ class format_visualsections extends format_base {
         $sql = "FROM {course_sections} cs
            LEFT JOIN {course_format_options} fo ON fo.sectionid = cs.id AND fo.name='parentid'
            LEFT JOIN {course_format_options} fo2 ON fo2.sectionid = cs.id AND fo2.name='typecode'
+           LEFT JOIN {course_format_options} fo3 ON fo3.sectionid = cs.id AND fo3.name='size'
                WHERE cs.course = ?";
         return $sql;
     }
@@ -93,7 +94,7 @@ class format_visualsections extends format_base {
         }
 
         $parentsql = $this->sql_section_parents();
-        $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode
+        $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode, fo3.value as size
                 $parentsql
                 ORDER BY cs.section";
 

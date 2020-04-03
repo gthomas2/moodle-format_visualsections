@@ -3,8 +3,10 @@ define(["jquery",
     "core/modal_factory",
     "core/modal_events",
     "core/fragment",
-    "core/ajax"
-], function($, Templates, ModalFactory, ModalEvents, Fragment, Ajax) {
+    "core/ajax",
+    "format_visualsections/dialog",
+    "core/str"
+], function($, Templates, ModalFactory, ModalEvents, Fragment, Ajax, Dialog, Str) {
     return {
         init: function() {
             var rewriteDataField = function() {
@@ -29,20 +31,12 @@ define(["jquery",
                 e.preventDefault();
                 var greatestPos = 0;
 
-                var count = 0;
                 $('.subsectiontypes .subsectiontyperow').each(function() {
-                    count ++;
                     var pos = $(this).data('pos');
                     if (pos && pos > greatestPos) {
                         greatestPos = pos;
                     }
                 });
-
-                if (count > 4) {
-                    // TODO localise.
-                    alert ('Max sub sections 5');
-                    return;
-                }
 
                 var data = {
                     pos: greatestPos + 1,
@@ -131,8 +125,13 @@ define(["jquery",
                         ])[0]
                             .then(function(result) {
                                 if (!result.success) {
-                                    // TODO - localise.
-                                    alert ('Error: failed to upload image');
+                                    Str.get_string("failedtouploadimage", "format_visualsections")
+                                        .then(function(str) {
+                                            Dialog.error(
+                                                str,
+                                                ''
+                                            );
+                                        });
                                 }
                                 var imgSrc = result.imagefile;
                                 modal.rowData.image = imgSrc;

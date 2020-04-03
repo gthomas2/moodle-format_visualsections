@@ -55,8 +55,7 @@ class add_subtopic extends \external_api {
     public static function service_returns() {
         $keys = [
             'success' => new \external_value(PARAM_BOOL, 'Was the sub-section successfully added', VALUE_REQUIRED),
-            'subsectionid' => new \external_value(PARAM_INT, 'Id of newly created subsection', VALUE_REQUIRED),
-            'html' => new \external_value(PARAM_RAW, 'HTML of newly created subsection', VALUE_REQUIRED)
+            'subsectionid' => new \external_value(PARAM_INT, 'Id of newly created subsection', VALUE_REQUIRED)
         ];
 
         return new \external_single_structure($keys, 'subsectionresult');

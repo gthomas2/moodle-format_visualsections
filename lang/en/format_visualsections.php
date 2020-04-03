@@ -70,3 +70,5 @@ $string['nextsections'] = 'Next set of sections';
 $string['prevsection'] = 'Previous section';
 $string['nextsection'] = 'Next section';
 $string['nextsectionlocked'] = 'The next section cannot be accessed until the current section is complete.';
+$string['toomanysubsections'] = 'Too many sub sections - max 5';
+$string['failedtomovesubsection'] = 'Failed to move subsection';
