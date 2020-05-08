@@ -243,6 +243,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $lastunlockedsection = null;
         $prevsection = null;
         $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
+        $blockaccessforward = false; // If true blocks access to sections forward from this point.
+        $vscount = 0; // Visual section count;
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -254,8 +256,12 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 // Skip sub sections.
                 continue;
             }
+            $vscount++;
 
             $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
+            if (!$prevsectioncomplete && $vscount > 1) {
+                $blockaccessforward = true;
+            }
 
             $firstsection = $firstsection ?? $section;
             $isfirstsection = $firstsection === $section;
@@ -286,7 +292,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 }
             }
             $cssclass = $isfirstsection ? 'active' : '';
-            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && $prevsectioncomplete);
+            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && !$blockaccessforward);
             $lastunlockedsection = $isunlockedsection ? $section->section : $lastunlockedsection;
             $strokecolor = $isunlockedsection ? '#f00' : '#eee';
 
