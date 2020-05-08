@@ -117,9 +117,9 @@ define(['jquery'], function($) {
                             // Deal with divided by 2 nicer.
                             if (segments.length === 2) {
                                 if (s === 1) {
-                                    y = 20;
-                                } else {
                                     y = - (rectSize + 20);
+                                } else {
+                                    y = 20;
                                 }
                             }
                             const typeCode = segments[s].typecode;
