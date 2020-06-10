@@ -217,7 +217,7 @@ body.format-visualsections #section-carousel .sectiontitle .badge {
   line-height: 1.5em; }
 
 body.format-visualsections #section-carousel .sectiontitle .badge-primary {
-  background-color: #cc0000; }
+  background-color: #ff0000; }
 
 body.format-visualsections #section-carousel .section-circle {
   width: 30%;
@@ -247,7 +247,7 @@ body.format-visualsections #section-carousel .circle-link {
   height: 30px; }
 
 body.format-visualsections #section-carousel .circle-link-unlocked {
-  border-bottom: 2px dashed #cc0000; }
+  border-bottom: 2px dashed #ff0000; }
 
 body.format-visualsections #section-carousel .circle-link-locked {
   border-bottom: 2px dashed #aaaaaa; }

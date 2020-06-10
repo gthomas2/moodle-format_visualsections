@@ -25,6 +25,7 @@
 
 $string['addsections'] = 'Add visualsections';
 $string['addsubsection'] = 'Add subsection';
+$string['circlenavtitle'] = 'How far have I come?';
 $string['currentsection'] = 'This topic';
 $string['editsection'] = 'Edit topic';
 $string['editsectionname'] = 'Edit topic name';

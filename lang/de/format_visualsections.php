@@ -25,6 +25,7 @@
 
 $string['addsections'] = 'Visualsections hinzufügen';
 $string['addsubsection'] = 'Unterabschnitt hinzufügen';
+$string['circlenavtitle'] = 'Wie weit bin ich schon geckommen?';
 $string['currentsection'] = 'Dieser Abschnitt';
 $string['editsection'] = 'Abschnitt bearbeiten';
 $string['editsectionname'] = 'Abschnittsnamen bearbeiten';

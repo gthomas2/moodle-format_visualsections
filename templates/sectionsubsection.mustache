@@ -16,11 +16,12 @@
                 </button>
             </div>
         {{/editmode}}
-        <h2 class="mb-0">
-            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#{{collapseid}}" aria-expanded="true" aria-controls="{{collapseid}}">
+        <h2 class="mb-0 subsection-heading">
+            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#{{collapseid}}" aria-expanded="true" aria-controls="{{collapseid}}">
                 <img src="{{imageurl}}" class="subsection-icon"/>
-                <span class="subsection-title">{{title}}</span>
+                <h4 class="subsection-title">{{title}}</h4>
                 {{{sizeicon}}}
+                <span class="toggleicon">{{# pix }} triangle, format_visualsections, Toggle sub section {{/ pix }}</span>
             </button>
         </h2>
     </div>

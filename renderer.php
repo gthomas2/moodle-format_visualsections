@@ -680,8 +680,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
                             $cardbody = $this->courserenderer->course_section_cm_list($course, $subsection->section, null);
                             $cardbody .= $this->courserenderer->course_section_add_cm_control($course, $subsection->section, null);
                             $typecode = $subsection->typecode;
-                            $type = $subsectiontypes[$typecode];
-                            $imageurl = $type->image;
+                            $type = $subsectiontypes[$typecode] ?? null;
+                            $imageurl = $type ? $type->image : '';
 
                             $sectionheader = $this->section_header($subsectioninfo, $course, false, 0);
                             $sectionfooter = $this->section_footer();

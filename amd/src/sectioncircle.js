@@ -138,17 +138,8 @@ define(['jquery'], function($) {
                             .appendTo($(arcsEl));
                         $(arcsEl).html($(arcsEl).html());
                     }
-
-
-
                 }
-
-
-
-
-
             });
-
         }
     };
 

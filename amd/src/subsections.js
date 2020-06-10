@@ -52,6 +52,11 @@ define(
                             html,
                             js
                         );
+                        const form = "#" + consts.SUBSECTION_FORM_CONT + " form";
+                        $(form).on("submit", function(e) {
+                           e.preventDefault();
+                           return false;
+                        });
                     });
             };
 
