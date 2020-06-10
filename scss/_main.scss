@@ -114,5 +114,11 @@ body.format-visualsections {
         justify-content: space-between;
         padding: 40px;
     }
+
+    &.editing {
+        #format-footer {
+            display: none;
+        }
+    }
 }
 

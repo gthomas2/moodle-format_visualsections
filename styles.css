@@ -344,3 +344,6 @@ body.format-visualsections #format-footer {
       -ms-flex-pack: justify;
           justify-content: space-between;
   padding: 40px; }
+
+body.format-visualsections.editing #format-footer {
+  display: none; }
