@@ -10,19 +10,20 @@ body.format-visualsections {
         display: none;
     }
 
-    .course-content ul.visualsections {
-        margin: 0;
-        list-style: none;
-    }
-
-    .course-content ul.visualsections li.section .content {
-        margin: 0 40px;
-    }
-
-    .course-content ul.visualsections li.section .left,
-    .course-content ul.visualsections li.section .right {
-        width: 40px;
-        padding: 0 6px;
+    .course-content {
+        ul.visualsections {
+            margin: 0;
+            list-style: none;
+        }
+        > ul.visualsections > li.section {
+            > .content {
+                margin: 0 40px;
+            }
+            > .left, .right {
+                width: 40px;
+                padding: 0 6px;
+            }
+        }
     }
 
     .course-content ul.visualsections li.section .left {

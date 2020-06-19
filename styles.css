@@ -262,11 +262,10 @@ body.format-visualsections .course-content ul.visualsections {
   margin: 0;
   list-style: none; }
 
-body.format-visualsections .course-content ul.visualsections li.section .content {
+body.format-visualsections .course-content > ul.visualsections > li.section .content {
   margin: 0 40px; }
 
-body.format-visualsections .course-content ul.visualsections li.section .left,
-body.format-visualsections .course-content ul.visualsections li.section .right {
+body.format-visualsections .course-content > ul.visualsections > li.section .left, body.format-visualsections .course-content > ul.visualsections > li.section .right {
   width: 40px;
   padding: 0 6px; }
 
