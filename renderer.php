@@ -243,6 +243,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $lastunlockedsection = null;
         $prevsection = null;
         $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
+        $capsegmentnav = has_capability('format/visualsections:segmentnavigation', context_course::instance($courseid));
         $blockaccessforward = false; // If true blocks access to sections forward from this point.
         $vscount = 0; // Visual section count;
         foreach ($sections as $section) {
@@ -272,9 +273,12 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
             $subtopics = [];
             $ss = 0;
+
+            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && !$blockaccessforward);
+
             foreach ($subsections as $subsection) {
                 $link = null;
-                if ($capviewallgrades) {
+                if ($capsegmentnav && (!$blockaccessforward || $capviewallgrades)) {
                     $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsection'.$subsection->id;
                 }
                 $subtopics[] = new subsection(
@@ -292,7 +296,6 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 }
             }
             $cssclass = $isfirstsection ? 'active' : '';
-            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && !$blockaccessforward);
             $lastunlockedsection = $isunlockedsection ? $section->section : $lastunlockedsection;
             $strokecolor = $isunlockedsection ? '#f00' : '#eee';
 
