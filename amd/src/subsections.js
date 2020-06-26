@@ -171,7 +171,7 @@ define(
                 var applySubsectionHash = function(hash) {
                     if (hash.indexOf('subsection')) {
                         // This is required when a module redirects us back to the subsection.
-                        hash.replace('subsection', 'subsect');
+                        hash = hash.replace('subsection', 'subsect');
                     }
                     $("#section-carousel").addClass("carousel-ready");
                     // First we need to make sure that the parent section is displaying.
