@@ -279,7 +279,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             foreach ($subsections as $subsection) {
                 $link = null;
                 if ($capsegmentnav && (!$blockaccessforward || $capviewallgrades)) {
-                    $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsection'.$subsection->id;
+                    $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsect'.$subsection->id;
                 }
                 $subtopics[] = new subsection(
                     $section->id,
