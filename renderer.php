@@ -100,28 +100,45 @@ class format_visualsections_renderer extends format_section_renderer_base {
         return $mods;
     }
 
+    /**
+     * Taken from snap shared.php section_activity_summary.
+     * @param $parentsection
+     * @return float|int|string
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
     protected function section_completion_progress($parentsection) {
-        global $COURSE;
+        global $COURSE, $CFG;
+        require_once($CFG->libdir.'/completionlib.php');
+
+        $completioninfo = new completion_info($COURSE);
+
         $mods = $this->get_section_mods($parentsection);
-        $completion = new completion_info($COURSE);
-        $countcomplete = 0;
-        if (!empty($mods)) {
-            foreach ($mods as $mod) {
-                $activitycompletiondata = $completion->get_data($mod, true);
-                $complete = (int) $activitycompletiondata->completionstate === COMPLETION_COMPLETE;
-                $countcomplete += $complete ? 1 : 0;
+
+        $total = 0;
+        $complete = 0;
+        $cancomplete = isloggedin() && !isguestuser();
+        foreach ($mods as $thismod) {
+            if ($thismod->uservisible) {
+                if ($cancomplete && $completioninfo->is_enabled($thismod) != COMPLETION_TRACKING_NONE) {
+                    $total++;
+                    $completiondata = $completioninfo->get_data($thismod, true);
+                    if ($completiondata->completionstate == COMPLETION_COMPLETE ||
+                        $completiondata->completionstate == COMPLETION_COMPLETE_PASS) {
+                        $complete++;
+                    }
+                }
             }
-        } else {
-            return false; // Must have mods to be completable.
         }
-        if ($countcomplete === 0) {
-            return false;
+        if ($total === 0) {
+            return 0;
         }
-        return ($countcomplete / count($mods)) * 100;
+
+        return ($complete / $total) * 100;
     }
 
     protected function section_complete($parentsection) {
-        return $this->section_completion_progress($parentsection) === 100;
+        return $this->section_completion_progress($parentsection) >= 100;
     }
 
     /**
