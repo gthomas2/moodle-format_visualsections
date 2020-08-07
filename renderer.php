@@ -373,7 +373,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 'index' => $idx
             ];
         }
-        $data = new topics_svg_circles($imageurls, $topicgroups);
+        $data = new topics_svg_circles($imageurls, $topicgroups, count($topicgroups) > 1);
 
         return $this->render_from_template('format_visualsections/topics_svg_circles', $data);
     }

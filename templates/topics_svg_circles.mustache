@@ -51,6 +51,7 @@
                 </div>
             {{/topicgroups}}
         </div>
+        {{#shownavcontrols}}
         <a class="carousel-control-prev" href="#section-carousel" role="button" data-slide="prev">
             {{# pix }} nav-left, format_visualsections {{/ pix }}
             <span class="sr-only">{{#str}}previoussections, format_visualsections{{/str}}</span>
@@ -67,5 +68,6 @@
                 </li>
             {{/topicgroups}}
         </ol>
+        {{/shownavcontrols}}
     </div>
 </div>

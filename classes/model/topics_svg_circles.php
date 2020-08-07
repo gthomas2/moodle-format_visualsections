@@ -17,12 +17,17 @@ class topics_svg_circles extends base_model {
     public $topicgroups;
 
     /**
+     * @var bool
+     */
+    public $shownavcontrols;
+
+    /**
      * Topcis svg circles constructor.
      * @param array $imageurls
      * @param array $topicgroups
      * @throws \ReflectionException
      */
-    public function __construct(array $imageurls, array $topicgroups) {
+    public function __construct(array $imageurls, array $topicgroups, ?bool $shownavcontrols = true) {
         $this->set_props_construct_args(func_get_args());
     }
 
