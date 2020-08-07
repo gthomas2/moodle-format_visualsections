@@ -140,6 +140,10 @@ class format_visualsections extends format_topics {
                 $node->get($section->id, navigation_node::TYPE_SECTION)->remove();
             }
         }
+
+        // Remove participants node.
+        $participants = $node->get('participants', navigation_node::TYPE_CONTAINER);
+        $participants->remove();
     }
 
     public function section_format_options($foreditform = false) {
