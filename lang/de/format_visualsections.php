@@ -73,3 +73,6 @@ $string['nextsection'] = 'Nächster Abschnitt';
 $string['nextsectionlocked'] = 'Auf den nächsten Abschnitt kann erst zugegriffen werden, wenn der aktuelle Abschnitt abgeschlossen ist.';
 $string['toomanysubsections'] = 'Zu viele Unterabschnitte - max. 5';
 $string['failedtomovesubsection'] = 'Unterabschnitt nicht verschoben';
+$string['visualsections:setsubsectiontypeimage'] = 'Can set subsection type images';
+$string['visualsections:segmentnavigation'] = 'Can navigate via circle segments';
+$string['warnmodulesinsection'] = 'Warning: The activities below in the top level section will not be visible by students. Move them into a subsection to make them visible to students.';

@@ -75,3 +75,4 @@ $string['toomanysubsections'] = 'Too many sub sections - max 5';
 $string['failedtomovesubsection'] = 'Failed to move subsection';
 $string['visualsections:setsubsectiontypeimage'] = 'Can set subsection type images';
 $string['visualsections:segmentnavigation'] = 'Can navigate via circle segments';
+$string['warnmodulesinsection'] = 'Warning: The activities below in the top level section will not be visible by students. Move them into a subsection to make them visible to students.';

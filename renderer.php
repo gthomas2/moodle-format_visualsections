@@ -49,12 +49,21 @@ class format_visualsections_renderer extends format_section_renderer_base {
     private $sectionservice;
 
     /**
+     * @var bool
+     */
+    private $capedit;
+
+    /**
      * Constructor method, calls the parent constructor
      *
      * @param moodle_page $page
      * @param string $target one of rendering target constants
      */
     public function __construct(moodle_page $page, $target) {
+        global $COURSE;
+
+        $this->capedit = has_capability('moodle/course:setcurrentsection', context_course::instance($COURSE->id));
+
         parent::__construct($page, $target);
 
         $this->sectionservice = section::instance();
@@ -70,9 +79,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
      */
     protected function init_section_js(string $defaultsection, int $courseid) {
         global $PAGE;
-        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
         $PAGE->requires->js_call_amd('format_visualsections/subsections', 'init',
-            [$courseid, $capviewallgrades, $defaultsection]);
+            [$courseid, $this->capedit, $defaultsection]);
     }
 
     /**
@@ -186,7 +194,6 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $sectionhierarchy = $format->get_section_hierarchy();
         $prevsection = null;
         $unlocked = false;
-        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
 
         foreach ($sections as $section) {
             if ($section->section === 0) {
@@ -203,7 +210,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
 
             if ($section->section === $sectionnum) {
-                if ($capviewallgrades || $prevsectioncomplete) {
+                if ($this->capedit || $prevsectioncomplete) {
                     $unlocked = true;
                 }
                 break; // Break regardless of whether unlocked or not - we have our section.
@@ -259,7 +266,6 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $prevsectioncomplete = false;
         $lastunlockedsection = null;
         $prevsection = null;
-        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($courseid));
         $capsegmentnav = has_capability('format/visualsections:segmentnavigation', context_course::instance($courseid));
         $blockaccessforward = false; // If true blocks access to sections forward from this point.
         $vscount = 0; // Visual section count;
@@ -291,11 +297,11 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $subtopics = [];
             $ss = 0;
 
-            $isunlockedsection = $capviewallgrades || $isfirstsection || ($section->available && !$blockaccessforward);
+            $isunlockedsection = $this->capedit || $isfirstsection || ($section->available && !$blockaccessforward);
 
             foreach ($subsections as $subsection) {
                 $link = null;
-                if ($capsegmentnav && (!$blockaccessforward || $capviewallgrades)) {
+                if ($capsegmentnav && (!$blockaccessforward || $this->capedit)) {
                     $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsect'.$subsection->id;
                 }
                 $subtopics[] = new subsection(
@@ -355,7 +361,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $topicgroups = array_chunk($topics, 3); // Three topics per group.
 
         $activeidx = 0;
-        if (!$capviewallgrades) {
+        if (!$this->capedit) {
             foreach ($topicgroups as $idx => $topics) {
                 foreach ($topics as $topic) {
                     if ($topic->number === $lastunlockedsection) {
@@ -387,18 +393,15 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
         static $carouseloutput = false; // Only output circle nav once.
 
-        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($COURSE->id));
-        $extraclass = $capviewallgrades ? ' capcourseupdate' : '';
+        $extraclass = $this->capedit ? ' capcourseupdate' : '';
 
         if ($carouseloutput) {
             return html_writer::start_tag('ul', array('class' => 'visualsections'.$extraclass));
         }
 
-        $capviewallgrades = has_capability('moodle/grade:viewall', context_course::instance($COURSE->id));
-
         $carouseloutput = true; // Only output circle nav once.
 
-        $classcanupdate = $capviewallgrades ? 'capcourseupdate' : '';
+        $classcanupdate = $this->capedit ? 'capcourseupdate' : '';
         $carousel = '<div id="section-carousel-content">'.$this->render_carousel($COURSE->id, true).'</div>';
         return $carousel.html_writer::start_tag('ul', array('class' => 'visualsections '.$classcanupdate));
     }
@@ -676,6 +679,17 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 echo $this->section_summary($thissection, $course, null);
             } else {
                 echo $this->section_header($thissection, $course, false, 0);
+
+                if ($this->capedit) {
+                    $cmlist = $this->courserenderer->course_section_cm_list($course, $thissection, null);
+                    if (strpos($cmlist, '<li') !== false) {
+                        echo '<div class="toplevelactivities">';
+                        echo $OUTPUT->notification(get_string('warnmodulesinsection', 'format_visualsections'), 'warning');
+                        echo $cmlist;
+                        echo '</div>';
+                    }
+                }
+
                 if ($thissection->uservisible) {
                     // For now section_add_menus is just here to satisfy JS for moving sections.
                     echo '<div class="section_add_menus"></div>';
