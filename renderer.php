@@ -687,6 +687,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
                         echo $OUTPUT->notification(get_string('warnmodulesinsection', 'format_visualsections'), 'warning');
                         echo $cmlist;
                         echo '</div>';
+                    } else {
+                        echo $cmlist;
                     }
                 }
 
