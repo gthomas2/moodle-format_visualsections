@@ -223,7 +223,8 @@ body.format-visualsections #section-carousel .section-circle {
   width: 30%;
   min-width: 150px;
   display: inline-block;
-  position: relative; }
+  position: relative;
+  padding: 1%; }
   body.format-visualsections #section-carousel .section-circle.locked i.fa-lock {
     position: absolute;
     top: 0.5em;
@@ -242,15 +243,35 @@ body.format-visualsections #section-carousel .carousel-topics {
           align-items: center; }
 
 body.format-visualsections #section-carousel .circle-link {
-  width: 3%;
+  width: 10%;
   max-width: 2rem;
-  height: 30px; }
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  right: -5%; }
 
 body.format-visualsections #section-carousel .circle-link-unlocked {
   border-bottom: 2px dashed #ff0000; }
 
 body.format-visualsections #section-carousel .circle-link-locked {
   border-bottom: 2px dashed #aaaaaa; }
+
+@media only screen and (max-width: 768px) {
+  body.format-visualsections #section-carousel h3.sectiontitle {
+    font-size: 0.8rem; }
+  body.format-visualsections #section-carousel .carousel-topics {
+    display: block; }
+  body.format-visualsections #section-carousel .section-circle {
+    width: 100%;
+    display: block; }
+  body.format-visualsections #section-carousel .circle-link {
+    position: absolute;
+    bottom: -5%;
+    right: -webkit-calc(50% - 30px);
+    right: calc(50% - 30px);
+    -webkit-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+            transform: rotate(90deg); } }
 
 body.format-visualsections#page-course-editsection #fitem_id_parentid, body.format-visualsections#page-course-editsection #fitem_id_typecode, body.format-visualsections#page-course-editsection #fitem_id_size {
   display: none; }
@@ -262,10 +283,10 @@ body.format-visualsections .course-content ul.visualsections {
   margin: 0;
   list-style: none; }
 
-body.format-visualsections .course-content > ul.visualsections > li.section .content {
+body.format-visualsections .course-content > ul.visualsections > li.section > .content {
   margin: 0 40px; }
 
-body.format-visualsections .course-content > ul.visualsections > li.section .left, body.format-visualsections .course-content > ul.visualsections > li.section .right {
+body.format-visualsections .course-content > ul.visualsections > li.section > .left, body.format-visualsections .course-content > ul.visualsections > li.section .right {
   width: 40px;
   padding: 0 6px; }
 
@@ -308,7 +329,8 @@ body.format-visualsections li.section {
   margin-bottom: 2em; }
 
 body.format-visualsections h3.sectiontitle {
-  font-size: 1rem; }
+  font-size: 1rem;
+  min-height: 4em; }
 
 body.format-visualsections .subsectiontyperow {
   margin-bottom: 0.25em;
@@ -320,9 +342,42 @@ body.format-visualsections .subsectiontypes ul {
 body.format-visualsections .subsection.yui3-dd-drop-active-invalid .section.collapse {
   display: block; }
 
-body.format-visualsections .card-header h2 button {
-  width: 100%;
-  text-align: left; }
+body.format-visualsections .card.subsection {
+  border: none;
+  border-bottom: 5px solid #000000; }
+  body.format-visualsections .card.subsection .card-header {
+    background-color: #ffffff;
+    border-bottom: none;
+    width: 100%;
+    text-align: left; }
+  body.format-visualsections .card.subsection .subsection-heading .btn-link, body.format-visualsections .card.subsection .subsection-heading .btn-link:hover {
+    text-decoration: none; }
+  body.format-visualsections .card.subsection span.inplaceeditable[data-itemtype="sectionname"] {
+    display: none; }
+  body.format-visualsections .card.subsection .subsection-title {
+    color: #000000;
+    font-size: 32px; }
+  body.format-visualsections .card.subsection h2.subsection-heading button {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row; }
+    body.format-visualsections .card.subsection h2.subsection-heading button .toggleicon {
+      margin-left: auto;
+      width: 16px;
+      display: block;
+      -webkit-transform: rotate(180deg);
+          -ms-transform: rotate(180deg);
+              transform: rotate(180deg); }
+    body.format-visualsections .card.subsection h2.subsection-heading button.collapsed .toggleicon {
+      -webkit-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+              transform: rotate(0deg); }
 
 body.format-visualsections ul li.section:last-of-type .subsection:last-of-type .move-down {
   display: none; }

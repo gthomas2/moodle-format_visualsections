@@ -12,7 +12,7 @@
 </div>
 
 <h2 id="section-carousel-content-tile">{{#str}}circlenavtitle, format_visualsections{{/str}}</h2>
-<div class="container">
+<div class="container mt-3">
     <div class="carousel slide" id="section-carousel">
         <div class="carousel-spinner"></div>
         <div class="carousel-inner row mx-auto">
@@ -40,12 +40,13 @@
                         {{#link}}
                             </a>
                         {{/link}}
+                            {{! This is purely cosmetic - just a link between the circles }}
+                            {{^lastitem}}
+                                <span class="circle-link {{#nextlocked}}circle-link-locked{{/nextlocked}}{{^nextlocked}}circle-link-unlocked{{/nextlocked}}"></span>
+                            {{/lastitem}}
                         </span>
 
-                        {{! This is purely cosmetic - just a link between the circles }}
-                        {{^lastitem}}
-                            <span class="circle-link {{#nextlocked}}circle-link-locked{{/nextlocked}}{{^nextlocked}}circle-link-unlocked{{/nextlocked}}"></span>
-                        {{/lastitem}}
+
                     {{/topics}}
                     </div>
                 </div>

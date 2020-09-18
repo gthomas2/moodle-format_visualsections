@@ -78,6 +78,7 @@ body.format-visualsections {
 
     h3.sectiontitle {
         font-size: 1rem;
+        min-height: 4em;
     }
 
     .subsectiontyperow {
@@ -93,9 +94,42 @@ body.format-visualsections {
         display: block;
     }
 
-    .card-header h2 button {
-        width: 100%;
-        text-align: left;
+    .card.subsection {
+        border: none;
+        border-bottom: 5px solid #000000;
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: none;
+            width: 100%;
+            text-align: left;
+        }
+        .subsection-heading .btn-link {
+            &,
+            &:hover {
+                text-decoration: none;
+            }
+        }
+        span.inplaceeditable[data-itemtype="sectionname"] {
+            display: none;
+        }
+        .subsection-title {
+            color: #000000;
+            font-size: 32px;
+        }
+        h2.subsection-heading button {
+            display: flex;
+            flex-direction: row;
+            .toggleicon {
+                margin-left: auto;
+                width: 16px;
+                display: block;
+                transform: rotate(180deg);
+            }
+
+            &.collapsed .toggleicon {
+                transform: rotate(0deg);
+            }
+        }
     }
 
     ul li.section:last-of-type .subsection:last-of-type .move-down {

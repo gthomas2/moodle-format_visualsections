@@ -335,6 +335,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 $nextlocked = !$this->section_unlocked($courseid, $nextsection->section);
             }
             $title = get_section_name($courseid, $section);
+            $maxlen = 40;
+            if (strlen($title) > $maxlen) {
+                $title = substr($title, 0, $maxlen).'...';
+            }
             $arialabel = empty($tooltip) ? get_string('navigatetosection', 'format_visualsections', $title) : null;
             $topics[] = new topic(
                 $section->id,

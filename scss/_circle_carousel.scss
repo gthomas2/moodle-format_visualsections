@@ -82,6 +82,7 @@ body.format-visualsections #section-carousel {
         min-width: 150px;
         display: inline-block;
         position: relative;
+        padding: 1%;
         &.locked i.fa-lock {
             position: absolute;
             top: 0.5em;
@@ -97,9 +98,12 @@ body.format-visualsections #section-carousel {
     }
 
     .circle-link {
-        width: 3%;
+        width: 10%;
         max-width: 2rem;
-        height: 30px
+        height: 30px;
+        position: absolute;
+        top: 50%;
+        right: -5%;
     }
 
     .circle-link-unlocked {
@@ -108,5 +112,29 @@ body.format-visualsections #section-carousel {
 
     .circle-link-locked {
         border-bottom: 2px dashed $locked-color;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+    body.format-visualsections #section-carousel {
+        h3.sectiontitle {
+            font-size: 0.8rem;
+            min-height: 1em;
+        }
+        .carousel-topics {
+            display: block;
+        }
+        .section-circle {
+            width: 100%;
+            display: block;
+        }
+        .circle-link {
+            position: absolute;
+            top: inherit;
+            bottom: -5%;
+            right: calc(50% - 30px);
+            transform: rotate(90deg);
+        }
     }
 }
