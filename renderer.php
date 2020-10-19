@@ -88,7 +88,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @param $parentsection
      * @return cm_info[]
      */
-    protected function get_section_mods($parentsection) {
+    protected function get_parent_section_mods($parentsection) {
         global $COURSE;
 
         $format = course_get_format($COURSE);
@@ -110,18 +110,23 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
     /**
      * Taken from snap shared.php section_activity_summary.
-     * @param $parentsection
+     * @param $section
      * @return float|int|string
      * @throws coding_exception
      * @throws moodle_exception
      */
-    protected function section_completion_progress($parentsection) {
+    protected function section_completion_progress($section) {
         global $COURSE, $CFG;
         require_once($CFG->libdir.'/completionlib.php');
 
         $completioninfo = new completion_info($COURSE);
-
-        $mods = $this->get_section_mods($parentsection);
+        $modinfo = $section->modinfo;
+        $mods = [];
+        if (!empty($modinfo->sections[$section->section])) {
+            foreach ($modinfo->sections[$section->section] as $modnumber) {
+                $mods[] = $modinfo->cms[$modnumber];
+            }
+        }
 
         $total = 0;
         $complete = 0;
@@ -145,8 +150,45 @@ class format_visualsections_renderer extends format_section_renderer_base {
         return ($complete / $total) * 100;
     }
 
-    protected function section_complete($parentsection) {
-        return $this->section_completion_progress($parentsection) >= 100;
+    /**
+     * Taken from snap shared.php section_activity_summary.
+     * @param $parentsection
+     * @return float|int|string
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    protected function parent_section_completion_progress($parentsection) {
+        global $COURSE, $CFG;
+        require_once($CFG->libdir.'/completionlib.php');
+
+        $completioninfo = new completion_info($COURSE);
+
+        $mods = $this->get_parent_section_mods($parentsection);
+
+        $total = 0;
+        $complete = 0;
+        $cancomplete = isloggedin() && !isguestuser();
+        foreach ($mods as $thismod) {
+            if ($thismod->uservisible) {
+                if ($cancomplete && $completioninfo->is_enabled($thismod) != COMPLETION_TRACKING_NONE) {
+                    $total++;
+                    $completiondata = $completioninfo->get_data($thismod, true);
+                    if ($completiondata->completionstate == COMPLETION_COMPLETE ||
+                        $completiondata->completionstate == COMPLETION_COMPLETE_PASS) {
+                        $complete++;
+                    }
+                }
+            }
+        }
+        if ($total === 0) {
+            return 0;
+        }
+
+        return ($complete / $total) * 100;
+    }
+
+    protected function parent_section_complete($parentsection) {
+        return $this->parent_section_completion_progress($parentsection) >= 100;
     }
 
     /**
@@ -207,7 +249,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 continue;
             }
 
-            $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
+            $prevsectioncomplete = !empty($prevsection) && $this->parent_section_complete($prevsection);
 
             if ($section->section === $sectionnum) {
                 if ($this->capedit || $prevsectioncomplete) {
@@ -282,7 +324,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
             $vscount++;
 
-            $prevsectioncomplete = !empty($prevsection) && $this->section_complete($prevsection);
+            $prevsectioncomplete = !empty($prevsection) && $this->parent_section_complete($prevsection);
             if (!$prevsectioncomplete && $vscount > 1) {
                 $blockaccessforward = true;
             }
@@ -290,9 +332,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $firstsection = $firstsection ?? $section;
             $isfirstsection = $firstsection === $section;
 
-            $progress = $this->section_completion_progress($section);
+            $progress = $this->parent_section_completion_progress($section);
 
             $subsections = $sectionhierarchy[$section->id]->children ?? [];
+
 
             $subtopics = [];
             $ss = 0;
@@ -304,10 +347,13 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 if ($capsegmentnav && (!$blockaccessforward || $this->capedit)) {
                     $link = $CFG->wwwroot.'/course/view.php?id='.$courseid.'#subsect'.$subsection->id;
                 }
+                $subsectionsection = $modinfo->get_section_info($subsection->section);
+                $subsectionprogress = $this->section_completion_progress($subsectionsection);
                 $subtopics[] = new subsection(
                     $section->id,
                     $subsection->typecode,
                     $subsection->size ?? 's',
+                    $subsectionprogress,
                     $subsection->name,
                     $subsection->id,
                     $link

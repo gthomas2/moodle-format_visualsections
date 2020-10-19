@@ -86,7 +86,7 @@ class format_visualsections extends format_topics {
         }
 
         $parentsql = $this->sql_section_parents();
-        $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode, fo3.value as size
+        $sql = "SELECT cs.*, fo.value AS parentid, fo2.value as typecode, fo3.value as size, cs.section
                 $parentsql
                 ORDER BY cs.section";
 

@@ -5,20 +5,9 @@ define(['jquery'], function($) {
 
                 $('.section-circle svg').each(function() {
                     const subtopics = $(this).data('subtopicsjson');
-                    const progress = $(this).data('progress');
                     const strokeColor = $(this).data('stroke');
-                    setProgress(this, progress);
                     createSegments(this, subtopics, strokeColor);
                 });
-
-                function setProgress(sectionCircle, perc) {
-                    var progCircle = $(sectionCircle).find('.progress');
-                    var radius = $(progCircle).attr('r');
-                    var dasharr = 2 * Math.PI * radius;
-                    var dashoffset = dasharr * (1 - (perc / 100));
-                    $(progCircle).attr('stroke-dasharray', dasharr)
-                        .attr('stroke-dashoffset', dashoffset);
-                }
 
                 function createSvgArc(x, y, r, startAngle, endAngle) {
                     if (startAngle > endAngle) {
@@ -53,6 +42,18 @@ define(['jquery'], function($) {
                     ].join(" ") + " Z";
                 }
 
+                function createSvgProgress(r, rotation, perc, strokeColor) {
+                    var dasharr = 2 * Math.PI * r;
+                    var dashoffset = dasharr * (1 - (perc / 100));
+                    return `<circle cx="0" cy="0" r="${r}"
+                                    transform="rotate(${rotation}) scale(1 -1)"
+                                    stroke-dasharray="${dasharr}"
+                                    stroke-dashoffset="${dashoffset}"
+                                    stroke-width="20"
+                                    fill="none"
+                                    stroke="${strokeColor}"/>`;
+                }
+
                 function imageHtml(x, y, rectSize, typeCode, link) {
                     let output = `<rect x="${x}" y="${y}" width="${rectSize}" height="${rectSize}" fill="url(#${typeCode})" />`;
                     if (link) {
@@ -71,8 +72,14 @@ define(['jquery'], function($) {
 
                     arcsEl.empty();
 
+                    var rot = 0;
+                    var rotbase = 360 / segments.length;
+
                     if (segments.length > 1) {
                         for (let s = 0; s < segments.length; s++) {
+                            rot = rotbase + (s * (360 / segments.length));
+                            var segment = segments[s];
+
                             perc += percMult;
                             let endAngle = (Math.PI * 2) / (100 / perc);
                             $("<path />")
@@ -82,9 +89,20 @@ define(['jquery'], function($) {
                                 .attr("fill", "none")
                                 //.attr("fill-opacity", "0.4")
                                 .appendTo($(arcsEl));
+
+                            // Add progress.
+                            window.console.log('segment progress', segment.progress);
+                            $(createSvgProgress(370, rot, segment.progress / segments.length, strokeColor))
+                                .appendTo($(arcsEl));
+
                             $(arcsEl).html($(arcsEl).html());
                             startAngle += endAngle;
                         }
+                    } else {
+                        rot = -180;
+                        var segment = segments[0];
+                        $(createSvgProgress(370, rot, segment.progress / segments.length, strokeColor))
+                            .appendTo($(arcsEl));
                     }
 
                     switch (segments.length) {

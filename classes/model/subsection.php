@@ -16,6 +16,11 @@ class subsection extends base_model {
     public $typecode;
 
     /**
+     * @var int
+     */
+    public $progress;
+
+    /**
      * @var string
      */
     public $size;
@@ -47,6 +52,7 @@ class subsection extends base_model {
         int     $parentid,
         string  $typecode,
         string  $size,
+        ?int    $progress = null,
         ?string $name = null,
         ?int    $id = null,
         ?string $link = null) {
