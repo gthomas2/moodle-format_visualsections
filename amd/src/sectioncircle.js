@@ -77,10 +77,11 @@ define(['jquery'], function($) {
 
                     if (segments.length > 1) {
                         for (let s = 0; s < segments.length; s++) {
-                            rot = rotbase + (s * (360 / segments.length));
-                            var segment = segments[s];
 
                             perc += percMult;
+
+                            var segment = segments[s];
+
                             let endAngle = (Math.PI * 2) / (100 / perc);
                             $("<path />")
                                 .attr("d", createSvgArc(0, 0, r, startAngle, endAngle * 2))
@@ -91,9 +92,13 @@ define(['jquery'], function($) {
                                 .appendTo($(arcsEl));
 
                             // Add progress.
-                            window.console.log('segment progress', segment.progress);
-                            $(createSvgProgress(370, rot, segment.progress / segments.length, strokeColor))
-                                .appendTo($(arcsEl));
+                            if (segment.progress > 0) {
+                                // We use the sliceoffset to make it work counter clockwise.
+                                var sliceoffset = 100 - segment.progress > 0 ? (100 - segment.progress) / 100 : 0;
+                                rot = (rotbase + ((s - sliceoffset) * (360 / segments.length)));
+                                $(createSvgProgress(370, rot, segment.progress / segments.length, strokeColor))
+                                    .appendTo($(arcsEl));
+                            }
 
                             $(arcsEl).html($(arcsEl).html());
                             startAngle += endAngle;
