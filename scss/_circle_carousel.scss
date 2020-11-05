@@ -143,5 +143,8 @@ body.format-visualsections #section-carousel {
         .subsection-progress {
             stroke: $unlocked-color;
         }
+        rect {
+            stroke: none;
+        }
     }
 }
