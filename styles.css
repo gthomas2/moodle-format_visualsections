@@ -258,7 +258,8 @@ body.format-visualsections #section-carousel .circle-link-locked {
 
 @media only screen and (max-width: 768px) {
   body.format-visualsections #section-carousel h3.sectiontitle {
-    font-size: 0.8rem; }
+    font-size: 0.8rem;
+    min-height: 1em; }
   body.format-visualsections #section-carousel .carousel-topics {
     display: block; }
   body.format-visualsections #section-carousel .section-circle {
@@ -266,12 +267,17 @@ body.format-visualsections #section-carousel .circle-link-locked {
     display: block; }
   body.format-visualsections #section-carousel .circle-link {
     position: absolute;
+    top: inherit;
     bottom: -5%;
     right: -webkit-calc(50% - 30px);
     right: calc(50% - 30px);
     -webkit-transform: rotate(90deg);
         -ms-transform: rotate(90deg);
-            transform: rotate(90deg); } }
+            transform: rotate(90deg); }
+  svg.svg-circle {
+    stroke: #eee; }
+    svg.svg-circle .subsection-progress {
+      stroke: #ff0000; } }
 
 body.format-visualsections#page-course-editsection #fitem_id_parentid, body.format-visualsections#page-course-editsection #fitem_id_typecode, body.format-visualsections#page-course-editsection #fitem_id_size {
   display: none; }
@@ -315,7 +321,7 @@ body.format-visualsections ul.visualsections.capcourseupdate li.section {
   display: block; }
 
 body.format-visualsections .subsection-icon {
-  max-width: 2em;
+  max-width: 3em;
   height: auto;
   margin-right: 1em; }
 
@@ -357,24 +363,25 @@ body.format-visualsections .card.subsection {
   body.format-visualsections .card.subsection .subsection-title {
     color: #000000;
     font-size: 32px; }
-  body.format-visualsections .card.subsection h2.subsection-heading button {
+  body.format-visualsections .card.subsection h2.subsection-heading > button {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
+    width: 100%;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
     -webkit-flex-direction: row;
         -ms-flex-direction: row;
             flex-direction: row; }
-    body.format-visualsections .card.subsection h2.subsection-heading button .toggleicon {
+    body.format-visualsections .card.subsection h2.subsection-heading > button .toggleicon {
       margin-left: auto;
       width: 16px;
       display: block;
       -webkit-transform: rotate(180deg);
           -ms-transform: rotate(180deg);
               transform: rotate(180deg); }
-    body.format-visualsections .card.subsection h2.subsection-heading button.collapsed .toggleicon {
+    body.format-visualsections .card.subsection h2.subsection-heading > button.collapsed .toggleicon {
       -webkit-transform: rotate(0deg);
           -ms-transform: rotate(0deg);
               transform: rotate(0deg); }

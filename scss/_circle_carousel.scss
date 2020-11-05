@@ -137,4 +137,11 @@ body.format-visualsections #section-carousel {
             transform: rotate(90deg);
         }
     }
+
+    svg.svg-circle {
+        stroke: #eee;
+        .subsection-progress {
+            stroke: $unlocked-color;
+        }
+    }
 }

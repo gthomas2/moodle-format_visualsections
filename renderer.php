@@ -826,6 +826,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
         }
 
+        if ($PAGE->user_is_editing() and has_capability('moodle/course:update', $context)) {
+            echo $this->change_number_sections($course, 0);
+        }
+
         echo $this->render_format_footer($course->id);
 
     }

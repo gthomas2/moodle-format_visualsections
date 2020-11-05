@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['addsections'] = 'Add visualsections';
+$string['addsections'] = 'Add parent sections';
 $string['addsubsection'] = 'Add subsection';
 $string['circlenavtitle'] = 'Your course progress';
 $string['currentsection'] = 'This topic';

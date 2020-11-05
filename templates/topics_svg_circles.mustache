@@ -25,27 +25,25 @@
                                 <span class="badge {{#locked}}badge-secondary{{/locked}}{{^locked}}badge-primary{{/locked}} mr-2">{{number}}</span>
                                 {{name}}
                             </h3>
-                        {{#link}}
-                            <a href="{{{link}}}" {{#arialabel}}aria-label="{{.}}"{{/arialabel}}>
-                        {{/link}}
-                        {{#locked}}
-                            <i class="fa fa-lock"></i>
-                        {{/locked}}
-                        <svg {{#tooltip}}data-toggle="tooltip" data-placement="bottom" title="{{.}}"{{/tooltip}} viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}" data-stroke="{{strokecolor}}">
-                            <circle cx="400" cy="400" r="360" fill="none" stroke="{{strokecolor}}" stroke-width="6"/>
-                            <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
-                            </g>
-                        </svg>
-                        {{#link}}
-                            </a>
-                        {{/link}}
+                            {{#link}}
+                                <a href="{{{link}}}" {{#arialabel}}aria-label="{{.}}"{{/arialabel}}>
+                            {{/link}}
+                            {{#locked}}
+                                <i class="fa fa-lock"></i>
+                            {{/locked}}
+                            <svg class="svg-circle" {{#tooltip}}data-toggle="tooltip" data-placement="bottom" title="{{.}}"{{/tooltip}} viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet" data-subtopicsjson="{{subtopicsjson}}" data-progress="{{progress}}" data-stroke="{{strokecolor}}">
+                                <circle class="main-circle" cx="400" cy="400" r="360" fill="none" stroke-width="6"/>
+                                <g class="arcs" transform=" translate(400 400) rotate(-90) scale(1 -1)">
+                                </g>
+                            </svg>
+                            {{#link}}
+                                </a>
+                            {{/link}}
                             {{! This is purely cosmetic - just a link between the circles }}
                             {{^lastitem}}
                                 <span class="circle-link {{#nextlocked}}circle-link-locked{{/nextlocked}}{{^nextlocked}}circle-link-unlocked{{/nextlocked}}"></span>
                             {{/lastitem}}
                         </span>
-
-
                     {{/topics}}
                     </div>
                 </div>

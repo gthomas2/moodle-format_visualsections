@@ -60,7 +60,7 @@ body.format-visualsections {
     }
 
     .subsection-icon {
-        max-width: 2em;
+        max-width: 3em;
         height: auto;
         margin-right: 1em;
     }
@@ -116,8 +116,9 @@ body.format-visualsections {
             color: #000000;
             font-size: 32px;
         }
-        h2.subsection-heading button {
+        h2.subsection-heading > button {
             display: flex;
+            width: 100%;
             flex-direction: row;
             .toggleicon {
                 margin-left: auto;
