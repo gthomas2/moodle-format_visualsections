@@ -256,6 +256,13 @@ body.format-visualsections #section-carousel .circle-link-unlocked {
 body.format-visualsections #section-carousel .circle-link-locked {
   border-bottom: 2px dashed #aaaaaa; }
 
+body.format-visualsections #section-carousel svg.svg-circle {
+  stroke: #eee; }
+  body.format-visualsections #section-carousel svg.svg-circle .subsection-progress {
+    stroke: #ff0000; }
+  body.format-visualsections #section-carousel svg.svg-circle rect {
+    stroke: none; }
+
 @media only screen and (max-width: 768px) {
   body.format-visualsections #section-carousel h3.sectiontitle {
     font-size: 0.8rem;
@@ -273,11 +280,7 @@ body.format-visualsections #section-carousel .circle-link-locked {
     right: calc(50% - 30px);
     -webkit-transform: rotate(90deg);
         -ms-transform: rotate(90deg);
-            transform: rotate(90deg); }
-  svg.svg-circle {
-    stroke: #eee; }
-    svg.svg-circle .subsection-progress {
-      stroke: #ff0000; } }
+            transform: rotate(90deg); } }
 
 body.format-visualsections#page-course-editsection #fitem_id_parentid, body.format-visualsections#page-course-editsection #fitem_id_typecode, body.format-visualsections#page-course-editsection #fitem_id_size {
   display: none; }

@@ -229,6 +229,25 @@ class format_visualsections_renderer extends format_section_renderer_base {
         return null;
     }
 
+    /**
+     * Get progression type for specific course id.
+     * Use static caching for speed.
+     * @param int $courseid
+     * @return string
+     */
+    private function get_progression_type(int $courseid): string {
+        static $progressiontypes = [];
+        if (!empty($progressiontypes[$courseid])) {
+            return $progressiontypes[$courseid];
+        }
+
+        $format = course_get_format($courseid);
+        $opts = (object) $format->get_format_options();
+        $progtype = $opts->progressiontype ?? 'linear';
+        $progressiontypes[$courseid] = $progtype;
+        return $progtype;
+    }
+
     private function section_info(int $courseid, int $sectionnum) {
         $modinfo = get_fast_modinfo($courseid);
         $sections = $modinfo->get_section_info_all();
@@ -258,6 +277,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 break; // Break regardless of whether unlocked or not - we have our section.
             }
             $prevsection = $section;
+        }
+
+        if ($this->get_progression_type($courseid) === 'random') {
+            $unlocked = true;
         }
         return (object) ['prevsection' => $prevsection, 'unlocked' => $unlocked];
     }
@@ -311,6 +334,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $capsegmentnav = has_capability('format/visualsections:segmentnavigation', context_course::instance($courseid));
         $blockaccessforward = false; // If true blocks access to sections forward from this point.
         $vscount = 0; // Visual section count;
+        $randomprog = $this->get_progression_type($courseid) === 'random';
+
         foreach ($sections as $section) {
             if ($section->section === 0) {
                 continue;
@@ -325,7 +350,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $vscount++;
 
             $prevsectioncomplete = !empty($prevsection) && $this->parent_section_complete($prevsection);
-            if (!$prevsectioncomplete && $vscount > 1) {
+            if (!$randomprog && !$prevsectioncomplete && $vscount > 1) {
                 $blockaccessforward = true;
             }
 
@@ -336,11 +361,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
             $subsections = $sectionhierarchy[$section->id]->children ?? [];
 
-
             $subtopics = [];
             $ss = 0;
 
-            $isunlockedsection = $this->capedit || $isfirstsection || ($section->available && !$blockaccessforward);
+            $isunlockedsection = $randomprog || $this->capedit || $isfirstsection || ($section->available && !$blockaccessforward);
 
             foreach ($subsections as $subsection) {
                 $link = null;

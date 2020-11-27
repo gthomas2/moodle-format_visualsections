@@ -140,10 +140,6 @@ class format_visualsections extends format_topics {
                 $node->get($section->id, navigation_node::TYPE_SECTION)->remove();
             }
         }
-
-        // Remove participants node.
-        $participants = $node->get('participants', navigation_node::TYPE_CONTAINER);
-        $participants->remove();
     }
 
     public function section_format_options($foreditform = false) {
@@ -165,6 +161,27 @@ class format_visualsections extends format_topics {
             ]
         ];
         return $options;
+    }
+
+    public function course_format_options($foreditform = false) {
+        $courseformatoptions = parent::course_format_options($foreditform);
+        $courseformatoptionsedit = [
+            'progressiontype' => [
+                'default' => 'linear',
+                'label' => new lang_string('progressiontype', 'format_visualsections'),
+                'element_type' => 'select',
+                'element_attributes' => [
+                    [
+                        'linear' => new lang_string('progressionlinear', 'format_visualsections'),
+                        'random' => new lang_string('progressionrandom', 'format_visualsections')
+                    ]
+                ],
+                'help' => 'progressiontype',
+                'help_component' => 'format_visualsections',
+            ]
+        ];
+
+        return array_merge($courseformatoptions, $courseformatoptionsedit);
     }
 
     public function section_action($section, $action, $sr) {
