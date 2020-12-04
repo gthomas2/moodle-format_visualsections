@@ -5,6 +5,8 @@ defined('MOODLE_INTERNAL') || die;
 
 use format_visualsections\model\subsection;
 use format_visualsections\model\subsectiontype;
+use section_info;
+use tool_httpsreplace\form;
 
 require_once __DIR__.'/../../../../../course/lib.php';
 require_once __DIR__.'/../../lib.php';
@@ -162,5 +164,21 @@ class section extends base_service {
         $course = get_course($parentsection->course);
 
         return move_section_to($course, $srcsection->section, $targetsection->section);
+    }
+
+    /**
+     * Get mods for a specific section.
+     * @param \section_info $section
+     * @return array
+     */
+    public function get_section_mods(section_info $section): array {
+        $modinfo = $section->modinfo;
+        $mods = [];
+        if (!empty($modinfo->sections[$section->section])) {
+            foreach ($modinfo->sections[$section->section] as $modnumber) {
+                $mods[] = $modinfo->cms[$modnumber];
+            }
+        }
+        return $mods;
     }
 }

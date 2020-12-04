@@ -99,6 +99,12 @@ class format_visualsections extends format_topics {
      * @return array
      */
     public function get_section_hierarchy(): array {
+        static $rootsections = null;
+        
+        if ($rootsections !== null) {
+            return $rootsections;
+        }
+        
         $subsections = [];
         $rootsections = [];
 

@@ -282,6 +282,10 @@ body.format-visualsections #section-carousel svg.svg-circle {
         -ms-transform: rotate(90deg);
             transform: rotate(90deg); } }
 
+body.format-visualsections.editing div.subsection .alert {
+  width: -webkit-calc(100% - 90px);
+  width: calc(100% - 90px); }
+
 body.format-visualsections#page-course-editsection #fitem_id_parentid, body.format-visualsections#page-course-editsection #fitem_id_typecode, body.format-visualsections#page-course-editsection #fitem_id_size {
   display: none; }
 

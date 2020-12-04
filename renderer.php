@@ -54,6 +54,21 @@ class format_visualsections_renderer extends format_section_renderer_base {
     private $capedit;
 
     /**
+     * @var \format_visualsections
+     */
+    private $format;
+
+    /**
+     * @var course_modinfo
+     */
+    private $modinfo;
+
+    /**
+     * @var stdClass
+     */
+    private $course;
+
+    /**
      * Constructor method, calls the parent constructor
      *
      * @param moodle_page $page
@@ -62,7 +77,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
     public function __construct(moodle_page $page, $target) {
         global $COURSE;
 
+        $this->course = $COURSE;
         $this->capedit = has_capability('moodle/course:setcurrentsection', context_course::instance($COURSE->id));
+        $this->format = course_get_format($COURSE);
+        $this->modinfo = get_fast_modinfo($COURSE);
 
         parent::__construct($page, $target);
 
@@ -89,9 +107,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @return cm_info[]
      */
     protected function get_parent_section_mods($parentsection) {
-        global $COURSE;
-
-        $format = course_get_format($COURSE);
+        $format = $this->format;
         $modinfo = $parentsection->modinfo;
         $mods = [];
         $sectionhierarchy = $format->get_section_hierarchy();
@@ -110,23 +126,17 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
     /**
      * Taken from snap shared.php section_activity_summary.
-     * @param $section
-     * @return float|int|string
+     * @param section_info $section
+     * @return float -1 means there are no mods that require completion.
      * @throws coding_exception
      * @throws moodle_exception
      */
-    protected function section_completion_progress($section) {
+    protected function section_completion_progress(section_info $section): float {
         global $COURSE, $CFG;
         require_once($CFG->libdir.'/completionlib.php');
 
         $completioninfo = new completion_info($COURSE);
-        $modinfo = $section->modinfo;
-        $mods = [];
-        if (!empty($modinfo->sections[$section->section])) {
-            foreach ($modinfo->sections[$section->section] as $modnumber) {
-                $mods[] = $modinfo->cms[$modnumber];
-            }
-        }
+        $mods = section::instance()->get_section_mods($section);
 
         $total = 0;
         $complete = 0;
@@ -144,7 +154,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
         }
         if ($total === 0) {
-            return 0;
+            return -1;
         }
 
         return ($complete / $total) * 100;
@@ -193,15 +203,14 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
     /**
      * Get the next section after $sectionnum
-     * @param int $courseid
      * @param int $sectionnum
      * @return null|object
      * @throws moodle_exception
      */
-    private function next_section(int $courseid, int $sectionnum): ?object {
-        $modinfo = get_fast_modinfo($courseid);
+    private function next_section(int $sectionnum): ?object {
+        $modinfo = $this->modinfo;
         $sections = $modinfo->get_section_info_all();
-        $format = course_get_format($courseid);
+        $format = $this->format;
         $sectionhierarchy = $format->get_section_hierarchy();
         $foundsection = null;
 
@@ -214,6 +223,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
             if (!empty($sectionhierarchy[$section->parentid])) {
                 // Skip sub sections.
+                continue;
+            }
+            if (!$this->capedit && !$this->root_section_has_completion($section)) {
+                // Skip sections that don't have any activities requiring completion.
                 continue;
             }
 
@@ -230,6 +243,36 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     /**
+     * Does a root section have any sub sections requiring completion?
+     * @param section_info $rootsection
+     * @return bool
+     */
+    public function root_section_has_completion(section_info $rootsection): bool {
+        $format = $this->format;
+        $modinfo = $this->modinfo;
+        $sectionhierarchy = $format->get_section_hierarchy();
+        $subsections = $sectionhierarchy[$rootsection->id]->children ?? [];
+        if (empty($subsections)) {
+            return false;
+        } else {
+            $hascompletion = false;
+            foreach ($subsections as $subsection) {
+                $subsectioninfo = $modinfo->get_section_info($subsection->section);
+
+                $completion = $this->section_completion_progress($subsectioninfo);
+                if ((int) $completion !== -1) {
+                    $hascompletion = true;
+                    break;
+                }
+            }
+            if ($hascompletion) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get progression type for specific course id.
      * Use static caching for speed.
      * @param int $courseid
@@ -241,7 +284,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             return $progressiontypes[$courseid];
         }
 
-        $format = course_get_format($courseid);
+        $format = $this->format;
         $opts = (object) $format->get_format_options();
         $progtype = $opts->progressiontype ?? 'linear';
         $progressiontypes[$courseid] = $progtype;
@@ -249,9 +292,9 @@ class format_visualsections_renderer extends format_section_renderer_base {
     }
 
     private function section_info(int $courseid, int $sectionnum) {
-        $modinfo = get_fast_modinfo($courseid);
+        $modinfo = $this->modinfo;
         $sections = $modinfo->get_section_info_all();
-        $format = course_get_format($courseid);
+        $format = $this->format;
         $sectionhierarchy = $format->get_section_hierarchy();
         $prevsection = null;
         $unlocked = false;
@@ -265,6 +308,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
             if (!empty($sectionhierarchy[$section->parentid])) {
                 // Skip sub sections.
+                continue;
+            }
+            if (!$this->capedit && !$this->root_section_has_completion($section)) {
+                // Skip sections that don't have any activities requiring completion.
                 continue;
             }
 
@@ -299,13 +346,12 @@ class format_visualsections_renderer extends format_section_renderer_base {
 
     /**
      * Get the previous section for a section (by section number).
-     * @param int $courseid
      * @param int $section - section number
      * @return bool
      * @throws moodle_exception
      */
-    private function previous_section(int $courseid, int $section) {
-        $info = $this->section_info($courseid, $section);
+    private function previous_section(int $section) {
+        $info = $this->section_info($this->course, $section);
         return $info->prevsection;
     }
 
@@ -320,10 +366,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             $imageurls[] = new imageurl($type->code, $type->image);
         }
 
-        $modinfo = get_fast_modinfo($courseid);
+        $modinfo = $this->modinfo;
         $sections = $modinfo->get_section_info_all();
 
-        $format = course_get_format($courseid);
+        $format = $this->format;
         $sectionhierarchy = $format->get_section_hierarchy();
 
         $topics = [];
@@ -345,6 +391,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
             }
             if (!empty($sectionhierarchy[$section->parentid])) {
                 // Skip sub sections.
+                continue;
+            }
+            if (!$this->capedit && !$this->root_section_has_completion($section)) {
+                // Skip sections that don't have any activities requiring completion.
                 continue;
             }
             $vscount++;
@@ -373,6 +423,15 @@ class format_visualsections_renderer extends format_section_renderer_base {
                 }
                 $subsectionsection = $modinfo->get_section_info($subsection->section);
                 $subsectionprogress = $this->section_completion_progress($subsectionsection);
+                if ((int) $subsectionprogress === -1) {
+                    $subsectionprogress = 0;
+                    if (!$this->capedit) {
+                        // Students will not be allowed to see sub sections that do not contain activities with
+                        // completion enabled.
+                        continue;
+                    }
+                }
+
                 $subtopics[] = new subsection(
                     $section->id,
                     $subsection->typecode,
@@ -399,7 +458,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             } else {
                 $tooltip = get_string('sectionlocked', 'format_visualsections');
             }
-            $nextsection = $this->next_section($courseid, $section->section);
+            $nextsection = $this->next_section($section->section);
             $nextlocked = false;
             if ($nextsection) {
                 $nextlocked = !$this->section_unlocked($courseid, $nextsection->section);
@@ -504,7 +563,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     public function section_title($section, $course) {
-        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section));
+        return $this->render($this->format->inplace_editable_render_section_name($section));
     }
 
     /**
@@ -515,7 +574,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * @return string HTML to output.
      */
     public function section_title_without_link($section, $course) {
-        return $this->render(course_get_format($course)->inplace_editable_render_section_name($section, false));
+        return $this->render($this->format->inplace_editable_render_section_name($section, false));
     }
 
     /**
@@ -605,14 +664,14 @@ class format_visualsections_renderer extends format_section_renderer_base {
      * Generate the display of the header part of a section before
      * course modules are included
      *
-     * @param stdClass $section The course_section entry from DB
+     * @param section_info $section
      * @param stdClass $course The course entry from DB
      * @param bool $onsectionpage true if being printed on a single-section page
      * @param int $sectionreturn The section to return to after an action
      * @return string HTML to output.
      */
     protected function section_header($section, $course, $onsectionpage, $sectionreturn=null) {
-        global $PAGE;
+        global $OUTPUT;
 
         $o = '';
         $currenttext = '';
@@ -623,7 +682,7 @@ class format_visualsections_renderer extends format_section_renderer_base {
             if (!$section->visible) {
                 $sectionstyle = ' hidden';
             }
-            if (course_get_format($course)->is_section_current($section)) {
+            if ($this->format->is_section_current($section)) {
                 $sectionstyle = ' current';
             }
         }
@@ -665,7 +724,28 @@ class format_visualsections_renderer extends format_section_renderer_base {
             // "Hidden sections are shown in collapsed form".
             $o .= $this->format_summary_text($section);
         }
-        $o .= html_writer::end_tag('div');
+
+        if ($this->capedit && $section->section !== 0) {
+            if (empty($section->parentid)) {
+                // Top level section.
+                // Show warning if section doesn't contain any sub sections containing activities that require completion.
+                $showwarning = !$this->root_section_has_completion($section);
+                if ($showwarning) {
+                    $o .= $OUTPUT->notification(
+                        get_string('warnnosectioncompletion', 'format_visualsections'), 'warning');
+                }
+            } else {
+                // Sub section.
+                // Show warning if subsection doesn't contain activities requiring completion.
+                $completion = $this->section_completion_progress($section);
+                if ((int) $completion === -1) {
+                    $o .= $OUTPUT->notification(
+                        get_string('warnnosubsectioncompletion', 'format_visualsections'), 'warning');
+                }
+            }
+        }
+
+        $o .= html_writer::end_tag('div'); // Close summary.
 
         return $o;
     }
@@ -676,8 +756,8 @@ class format_visualsections_renderer extends format_section_renderer_base {
         $tooltip = null;
         $prevsection = null;
         if ($section) {
-            $nextsection = $this->next_section($course, $section);
-            $prevsection = $this->previous_section($course, $section);
+            $nextsection = $this->next_section($section);
+            $prevsection = $this->previous_section($section);
             if ($nextsection) {
                 $nextunlocked = $this->section_unlocked($course, $nextsection->section);
                 $tooltip = $nextunlocked ? null : get_string('nextsectionlocked', 'format_visualsections');
@@ -718,10 +798,10 @@ class format_visualsections_renderer extends format_section_renderer_base {
     public function print_multiple_section_page($course, $sections, $mods, $modnames, $modnamesused) {
         global $PAGE, $OUTPUT;
 
-        $format = course_get_format($course);
+        $format = $this->format;
 
-        $modinfo = get_fast_modinfo($course);
-        $course = course_get_format($course)->get_course();
+        $modinfo = $this->modinfo;
+        $course = $format->get_course();
 
         $subsectiontypes = $this->sectionservice->config_to_types_array();
 

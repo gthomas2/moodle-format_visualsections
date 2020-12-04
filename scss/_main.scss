@@ -1,5 +1,10 @@
 body.format-visualsections {
 
+    &.editing div.subsection .alert {
+        // Prevent sub section alerts from covering up the edit menu.
+        width: calc(100% - 90px);
+    }
+
     &#page-course-editsection {
         #fitem_id_parentid, #fitem_id_typecode, #fitem_id_size {
             display: none;
