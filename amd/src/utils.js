@@ -37,12 +37,14 @@ define(['jquery'], function($) {
             var dfd = $.Deferred();
             var i = 0;
 
-            setInterval(function() {
-                i = !i ? 0 : i + 1;
+            var iv = setInterval(function() {
+                i = !i ? 1 : i + 1;
                 if (i > maxIterations) {
+                    clearInterval(iv);
                     dfd.reject();
                 }
                 if (evaluateFunction()) {
+                    clearInterval(iv);
                     dfd.resolve();
                 }
             }, 200);

@@ -72,16 +72,18 @@ class format_visualsections extends format_topics {
 
     /**
      * Get sections including the parentid field.
+     *
+     * @param bool $nocache;
      * @return array|null
      * @throws dml_exception
      */
-    public function get_sections_with_parentid(): ?array {
+    public function get_sections_with_parentid($nocache = false): ?array {
         global $DB;
 
         // Static caching for performance.
         static $rs = null;
 
-        if ($rs !== null) {
+        if ($rs !== null && !PHPUNIT_TEST && !CLI_SCRIPT && !$nocache) {
             return $rs;
         }
 

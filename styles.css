@@ -263,6 +263,18 @@ body.format-visualsections #section-carousel svg.svg-circle {
   body.format-visualsections #section-carousel svg.svg-circle rect {
     stroke: none; }
 
+body.format-visualsections #section-carousel .overlay-nav-trigger {
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+  min-height: 3rem;
+  max-height: 3rem;
+  padding: 0;
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  z-index: 999999; }
+
 @media only screen and (max-width: 768px) {
   body.format-visualsections #section-carousel h3.sectiontitle {
     font-size: 0.8rem;

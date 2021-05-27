@@ -82,3 +82,4 @@ $string['progressionlinear'] = 'Linear';
 $string['progressionrandom'] = 'Unrestricted';
 $string['progressiontype'] = 'Progression type';
 $string['progressiontype_help'] = 'The type of progression to be used within the course';
+$string['coursemap'] = 'Course map navigation';

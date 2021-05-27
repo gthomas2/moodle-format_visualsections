@@ -59,17 +59,9 @@ function xmldb_format_visualsections_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018030900, 'format', 'visualsections');
     }
 
-    // Automatically generated Moodle v3.5.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.6.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.7.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.8.0 release upgrade line.
-    // Put any upgrade step following this.
+    if ($oldversion < 2020022810) {
+        format_visualsections_upgrade_fix_ordering();
+    }
 
     return true;
 }

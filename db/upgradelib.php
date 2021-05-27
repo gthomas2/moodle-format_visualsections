@@ -142,3 +142,79 @@ function format_visualsections_upgrade_add_empty_sections($courseid, $numsection
         course_create_section($courseid, $sectionnum, true);
     }
 }
+
+function format_visualsections_upgrade_fix_ordering() {
+    global $DB;
+    $courses = $DB->get_records('course', ['format' => 'visualsections']);
+    foreach ($courses as $course) {
+        $subsections = [];
+        $parentsections = [];
+        mtrace('Processing course '.$course->id);
+        mtrace(str_repeat('-', 200));
+        $format = course_get_format($course);
+        $sectionparentids = $format->get_sections_with_parentid(true);
+        course_modinfo::clear_instance_cache($course);
+        $modinfo = course_modinfo::instance($course);
+        $sections = $modinfo->get_section_info_all();
+        $s = 0;
+        foreach ($sections as $thissection) {
+            $s++;
+            if (!empty($sectionparentids[$thissection->id]->parentid)) {
+                // Is sub section.
+                if (empty($subsections[$thissection->parentid])) {
+                    $subsections[$thissection->parentid] = [];
+                }
+                $subsections[$thissection->parentid][] = $thissection;
+            } else {
+                $parentsections[] = $thissection;
+            }
+        }
+
+        $section = -1;
+        $sectionpositions = [];
+        foreach ($parentsections as $parentsection) {
+            $section ++;
+            $sectionpositions[] = (object) [
+                'type' => 'parent',
+                'name' => $parentsection->name,
+                'sectionid' => $parentsection->id,
+                'section' => $section
+            ];
+            if (empty($subsections[$parentsection->id])) {
+                continue;
+            }
+            $subs = $subsections[$parentsection->id];
+            foreach ($subs as $sub) {
+                $section ++;
+                $sectionpositions[] = (object) [
+                    'type' => 'subsection',
+                    'name' => $sub->name,
+                    'sectionid' => $sub->id,
+                    'section' => $section
+                ];
+            }
+        }
+
+        // Prime easy re-ordering by adding 99999 onto existing section numbers.
+        foreach ($sectionpositions as $sectionposition) {
+            $DB->update_record('course_sections', [
+                'id'      => $sectionposition->sectionid,
+                'section' => $sectionposition->section + 99999]
+            );
+        }
+
+        // Now actually do reordering.
+        foreach ($sectionpositions as $sectionposition) {
+            $sectionnow = $DB->get_record('course_sections', ['id' => $sectionposition->sectionid]);
+            mtrace('Moving section '.$sectionnow->id.' from section '.$sectionnow->section.' to '.$sectionposition->section);
+            $DB->update_record('course_sections', [
+                    'id'      => $sectionposition->sectionid,
+                    'section' => $sectionposition->section]
+            );
+        }
+
+        rebuild_course_cache($course->id, true);
+        mtrace("*** DONE ***");
+        mtrace("");
+    }
+}

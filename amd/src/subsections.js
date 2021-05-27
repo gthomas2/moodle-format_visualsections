@@ -35,6 +35,20 @@ define(
                     });
                 });
 
+                var overlayNav = function() {
+                    $('#section-carousel-content').on('click', '.js-overlay-nav-trigger', function() {
+                        Dialog.default(
+                            '',
+                            '<div id="nav-overlay"></div>'
+                        );
+                        Templates.render('format_visualsections/nonlinear_svg_circles', [])
+                            .then(function(html) {
+                                $('#nav-overlay').html(html);
+                            });
+                    });
+                };
+                overlayNav();
+
                 var loadSubsectionForm = function(data) {
                     if (typeof data !== "string" && !(data instanceof String)) {
                         data = new URLSearchParams(data).toString();
