@@ -171,7 +171,35 @@ class format_visualsections extends format_topics {
         return $options;
     }
 
+    public function update_course_format_options($data, $oldcourse = null) {
+        $data = (array)$data;
+
+        // Save header image.
+        $context = context_course::instance($this->courseid);
+        file_save_draft_area_files($data['headerimage'], $context->id, 'format_visualsections',
+            'headerimage', 0, ['subdirs' => 0, 'maxfiles' => 1]);
+
+        if ($oldcourse !== null) {
+            $oldcourse = (array)$oldcourse;
+            $options = $this->course_format_options();
+            foreach ($options as $key => $unused) {
+                if (!array_key_exists($key, $data)) {
+                    if (array_key_exists($key, $oldcourse)) {
+                        $data[$key] = $oldcourse[$key];
+                    }
+                }
+            }
+        }
+        return parent::update_course_format_options($data, $oldcourse);
+    }
+
     public function course_format_options($foreditform = false) {
+        $fileopts = [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+            'accepted_types' => ['.jpg', '.gif', '.png'],
+            'itemid' => 0
+        ];
         $courseformatoptions = parent::course_format_options($foreditform);
         $courseformatoptionsedit = [
             'progressiontype' => [
@@ -186,6 +214,14 @@ class format_visualsections extends format_topics {
                 ],
                 'help' => 'progressiontype',
                 'help_component' => 'format_visualsections',
+            ],
+            'headerimage' => [
+                'label' => new lang_string('headerimage', 'format_visualsections'),
+                'element_type' => 'filepicker',
+                'element_attributes' => [null,
+                    $fileopts
+                ],
+                'type' => PARAM_CLEANFILE
             ]
         ];
 
@@ -327,7 +363,6 @@ function format_visualsections_output_fragment_footer(array $args) {
     return $output->render_format_footer($args['courseid'], $args['section']);
 }
 
-
 /**
  * Server format visual sections pluginfile.
  * @param $course
@@ -350,7 +385,7 @@ function format_visualsections_pluginfile($course,
                            $forcedownload,
                            array $options=array()) {
 
-    if ($context->contextlevel != CONTEXT_SYSTEM) {
+    if ($context->contextlevel != CONTEXT_COURSE && $context->contextlevel != CONTEXT_SYSTEM) {
         return false;
     }
 

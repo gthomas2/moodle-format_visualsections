@@ -172,6 +172,7 @@ function format_visualsections_upgrade_fix_ordering() {
 
         $section = -1;
         $sectionpositions = [];
+        // Create ordering for parents.
         foreach ($parentsections as $parentsection) {
             $section ++;
             $sectionpositions[] = (object) [
@@ -180,7 +181,11 @@ function format_visualsections_upgrade_fix_ordering() {
                 'sectionid' => $parentsection->id,
                 'section' => $section
             ];
+        }
+        // Create ordering for sub sections.
+        foreach ($parentsections as $parentsection) {
             if (empty($subsections[$parentsection->id])) {
+                // No sub sections for this parent.
                 continue;
             }
             $subs = $subsections[$parentsection->id];
